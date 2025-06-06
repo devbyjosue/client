@@ -1,0 +1,77 @@
+
+<form 
+    [formGroup]="entryForm"
+    (ngSubmit)="onSubmitForm()"
+    class="max-w-sm mx-auto bg-gray-400 p-10 rounded-lg shadow-md relative">
+    <div 
+        (click)="toggleForm()"
+        class="w-5 h-5 hover:scale-125 hover:rotate-180 transition-all cursor-pointer absolute top-5 right-5">
+            <svg viewBox="-0.5 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" 
+                stroke-width="0"></g><g id="SVGRepo_tracerCarrier" 
+                stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M3 21.32L21 3.32001" 
+                    stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                </path> 
+            <path d="M3 3.32001L21 21.32" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg>
+        </div>
+
+  <div class="mb-5">
+    <label for="email" class="block mb-2 text-sm font-medium text-gray-900 ">Value 1</label>
+  
+    <input  
+    formControlName="value1"
+    class="shadow-xs bg-gray-50 border border-gray-300 text-gray-900 
+    text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 " />
+  </div>
+  <div class="mb-5">
+    <label for="password" class="block mb-2 text-sm font-medium text-gray-900 ">Value 2</label>
+    <input 
+    formControlName="value2"
+    class="shadow-xs bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "  />
+  </div>
+  <div class="mb-5">
+    <label for="repeat-password" class="block mb-2 text-sm font-medium text-gray-900 ">Value 3</label>
+    <input 
+    type="number"
+    pattern="[0-9]*"
+    formControlName="value3"
+    class="shadow-xs bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "  />
+  </div>
+
+        <!-- @if (isEdition()) {
+         <div class="mb-5">
+    <label for="email" class="block mb-2 text-sm font-medium text-gray-900 ">Edit Value 1</label>
+  
+    <input  
+    formControlName="value1"
+    class="shadow-xs bg-gray-50 border border-gray-300 text-gray-900 
+    text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 " />
+  </div>
+  <div class="mb-5">
+    <label for="password" class="block mb-2 text-sm font-medium text-gray-900 ">Edit Value 2</label>
+    <input 
+    formControlName="value2"
+    class="shadow-xs bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "  />
+  </div>
+  <div class="mb-5">
+    <label for="repeat-password" class="block mb-2 text-sm font-medium text-gray-900 ">Edit Value 3</label>
+    <input 
+    type="number"
+    pattern="[0-9]*"
+    formControlName="value3"
+    class="shadow-xs bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "  />
+  </div>
+  
+        }
+
+    @if (!isEdition()) {
+        
+} -->
+  
+  <button 
+  type="submit"
+  class="text-white bg-blue-700 hover:bg-blue-800 
+  focus:ring-4 focus:outline-none focus:ring-blue-300 
+  font-medium rounded-lg text-sm px-5 py-2.5 text-center ">
+    Add
+</button>
+</form>

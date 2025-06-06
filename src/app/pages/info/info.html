@@ -1,0 +1,30 @@
+<section class="relative flex flex-col h-full w-screen p-10">
+    <div class="flex justify-end items-center p-2">
+        <button 
+        class="cursor-pointer bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded" 
+        (click)="openForm(formSignal())">
+            Add 
+        </button>
+    </div>
+    <div class="absolute top-0 left-0 z-10 w-full h-full flex justify-center items-center "
+     *ngIf="formSignal()"
+     >
+     @if(editDataSignal()){
+        <app-table-form 
+        [formDataForEdition]="editDataSignal()"
+        (submitForm)="submitForm($event)"
+        (closeForm)="openForm(formSignal())"/>
+     }
+     @if(!editDataSignal()){
+        <app-table-form 
+        (submitForm)="submitForm($event)"
+        (closeForm)="openForm(formSignal())"/>
+     }
+    </div>
+
+
+    <app-table 
+    (editAction)="editAction($event)"
+    (deleteAction)="deleteAction($event)"
+    [tableDataInput]="tableDataInput"/>
+</section>

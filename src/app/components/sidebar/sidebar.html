@@ -1,0 +1,25 @@
+<section class="aboslute w-72 h-screen bg-[#e9ecef] z-10 top-0 p-6 flex flex-col items-left ">
+<div class="flex flex-col h-[10%]">
+    <div class="w-full flex justify-end items-center">
+        <div 
+        (click)="toggleSidebar()"
+        class="w-5 h-5 hover:scale-125 hover:rotate-180 transition-all cursor-pointer">
+            <svg viewBox="-0.5 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" 
+                stroke-width="0"></g><g id="SVGRepo_tracerCarrier" 
+                stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M3 21.32L21 3.32001" 
+                    stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M3 3.32001L21 21.32" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg>
+        </div>
+    </div>
+    <h1 class="text-4xl font-semibold text-black">Data Sections</h1>
+</div>
+    <section class="flex flex-col h-[90%] items-start pl-3 overflow-y-auto mt-5 ">
+        @for (section of sidebarLinks; track section) {
+            <app-nav-section [sectionData]="section"/>
+        } @empty {
+            <div></div>
+        }
+    </section>
+</section>
+
+
+<!-- <svg fill="#000000" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 302 302" xml:space="preserve"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <g> <rect y="36" width="302" height="30"></rect> <rect y="236" width="302" height="30"></rect> <rect y="136" width="302" height="30"></rect> </g> </g></svg> -->
