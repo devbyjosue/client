@@ -14,7 +14,12 @@
 </div>
     <section class="flex flex-col h-[90%] items-start pl-3 overflow-y-auto mt-5 gap-3">
         @for (section of sidebarLinks; track section) {
-            <app-nav-section [sectionData]="section"/>
+            @if (!isAuthenticated() && section.name == "Administration"){
+
+            }
+            @else {
+                <app-nav-section [sectionData]="section"/>
+            }
         } @empty {
             <div></div>
         }

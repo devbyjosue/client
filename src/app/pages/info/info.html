@@ -17,7 +17,7 @@
             [rowAlternationEnabled]="true"
             (onRowUpdating)="onRowUpdating($event)" 
             (onRowRemoving)="onRowRemoving($event)"
-            keyExpr="id"  
+            [keyExpr]="gridKeyField"  
             class="w-full" 
         >
             <dxo-paging [pageSize]="10"></dxo-paging>

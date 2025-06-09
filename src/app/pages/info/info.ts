@@ -6,20 +6,19 @@ import { Observable, of } from 'rxjs';
 import { Role, TableData, user } from '../../../types';
 import { rolesHeaders, sections, subSections, usersHeaders } from '../../../mocks';
 import { TableForm } from "../../components/table-form/table-form";
-import { DxDataGridModule, DxButtonModule } from 'devextreme-angular'; // Added DevExtreme imports
+import { DxDataGridModule, DxButtonModule } from 'devextreme-angular';
 import { capitalize } from '../../../utils/capitalize';
 
 
 @Component({
   selector: 'app-info',
-  // Removed Table from imports, Added DxDataGridModule, DxButtonModule
   imports: [CommonModule, HttpClientModule, TableForm, DxDataGridModule, DxButtonModule],
   templateUrl: './info.html',
   styleUrl: './info.css'
 })
 export class Info implements OnInit {
 
-  // Mock data
+  
   private mockUsers: user[] = [
     { id: 1, name: 'Alice Wonderland', voucher: 'VOUCHER001', roleId: 1, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
     { id: 2, name: 'Bob The Builder', voucher: 'VOUCHER002', roleId: 2, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
@@ -35,17 +34,16 @@ export class Info implements OnInit {
   private nextRoleId = 4;
 
   sectionSignal = signal("" as string | null);
-  subSectionSignal = signal("" as string | null); // Added for easier access in template
+  subSectionSignal = signal("" as string | null); 
   formSignal = signal(false);
+  gridKeyField: string = "id";
 
-  // Adjusted for DxDataGrid: dataSource will hold the array of objects directly
   dataSource: any[] = []; 
-  // columnHeaders will be used to configure DxDataGrid columns
   columnConfigurations: any[] = []; 
 
   constructor(
     private route: ActivatedRoute,
-    private http: HttpClient, // Keep for potential future use
+    private http: HttpClient, 
     private router: Router
     ) {}
 
@@ -55,9 +53,23 @@ export class Info implements OnInit {
       const subSection = params.get('subSection');
       this.sectionSignal.set(section);
       this.subSectionSignal.set(subSection);
+
+      if (subSection === 'sales') {
+        this.gridKeyField = 'salesOrderId';
+      } else if (subSection === 'users' || subSection === 'roles') {
+        this.gridKeyField = 'id';
+      } else {
+        this.gridKeyField = 'id';
+      }
+
+
+
       this.loadGridData(subSection);
     });
+    
   }
+
+
 
   loadGridData(subSection: string | null): void {
     if (!subSection) return;
@@ -66,7 +78,7 @@ export class Info implements OnInit {
         this.getUsers().subscribe(users => {
           this.dataSource = users;
           this.columnConfigurations = [
-            { dataField: 'id', caption: 'ID', visible: false }, 
+            { dataField: 'id', caption: 'ID', visible: true }, 
             { dataField: 'name', caption: 'Name' },
             { dataField: 'voucher', caption: 'Voucher' },
             { dataField: 'roleId', caption: 'Role ID' },
@@ -87,7 +99,32 @@ export class Info implements OnInit {
             { type: 'buttons', buttons: ['edit', 'delete'] }
           ];
         });
+    }else if (subSection === "sales") {
+    this.getSalesOrdersHeaders().subscribe(salesOrders => {
+        console.log("Sales Orders:", salesOrders);
+        this.dataSource = salesOrders;
+        this.columnConfigurations = [
+          { dataField: 'salesOrderId', caption: 'ID', visible: true },
+          { dataField: 'revisionNumber', caption: 'Revision Number' },
+          { dataField: 'orderDate', caption: 'Order Date', dataType: 'datetime' },
+          { dataField: 'dueDate', caption: 'Due Date', dataType: 'datetime' },
+          { dataField: 'shipDate', caption: 'Ship Date', dataType: 'datetime' },
+          { dataField: 'status', caption: 'Status' },
+          { dataField: 'salesOrderNumber', caption: 'Sales Order Number' },
+          { dataField: 'purchaseOrderNumber', caption: 'Purchase Order Number' },
+          { dataField: 'accountNumber', caption: 'Account Number' },
+          { dataField: 'subTotal', caption: 'Sub Total' },
+          { dataField: 'taxAmt', caption: 'Tax Amt' },
+          { dataField: 'freight', caption: 'Freight' },
+          { dataField: 'totalDue', caption: 'TotalDue' },
+          { dataField: 'comment', caption: 'Comment' },
+          { dataField: 'modifiedDate', caption: 'Modified Date', dataType: 'datetime' },
+          { type: 'buttons', buttons: ['edit', 'delete'] }
+        ];
+      });
+    
     }
+
   }
 
   capitalize = capitalize;
@@ -117,11 +154,9 @@ export class Info implements OnInit {
             };
 
             this.createUser(newUser)
+            this.loadGridData(currentSubSection);
 
-
-            this.mockUsers.unshift(newUser);
-            this.dataSource = [...this.mockUsers]; // Update dataSource to trigger UI refresh
-            console.log('User created and added to array:', newUser);
+            
             this.closeTheForm();
         } else if (currentSubSection === "roles"){
             const newRole: Role = {
@@ -132,11 +167,9 @@ export class Info implements OnInit {
             };
             
             this.createRoles(newRole)
+            this.loadGridData(currentSubSection);
 
-
-            this.mockRoles.unshift(newRole);
-            this.dataSource = [...this.mockRoles]; 
-            console.log('Role created and added to array:', newRole);
+            
             this.closeTheForm();
         }
     
@@ -144,6 +177,7 @@ export class Info implements OnInit {
   
   baseUrl = "http://localhost:5178/api/users";
   baseUrlRoles = "http://localhost:5178/api/roles";
+  baseUrlSales = "http://localhost:5178/api/sales";
 
   onRowUpdating(e: any) {
     
@@ -225,6 +259,21 @@ export class Info implements OnInit {
   }
   
   
+getSalesOrdersHeaders(){
+  const salesOrdersHeaders: any[] = []
+
+  this.http.get<any>(this.baseUrlSales).subscribe({
+    next: salesOrders => {
+      salesOrdersHeaders.push(...salesOrders);
+    },
+    error: (err) => {
+      console.error("Error fetching headers:", err);
+    }
+  })
+  return of(salesOrdersHeaders);
+}
+
+
 
   getUserHeaders(){
     return usersHeaders; 
@@ -267,9 +316,6 @@ export class Info implements OnInit {
         console.error('Error creating user:', err)
       }
     })
-    // this.mockUsers.push(userWithId);
-    // console.log('Created user (mock):', userWithId);
-    // // window.location.reload(); // Replaced with loadGridData
     return of(userWithId);
   }
 
@@ -313,14 +359,13 @@ export class Info implements OnInit {
   }
   
   getRoleHeaders(){
-    return rolesHeaders; // Still can be used for reference
+    return rolesHeaders; 
   }
 
-  getRoleById(id: number): Observable<Role | undefined>{
-    // return this.http.get(`${this.baseUrlRoles}/${id}`);
-    const role = this.mockRoles.find(r => r.id === id);
-    return of(role);
-  }
+  // getRoleById(id: number): Observable<Role | undefined>{
+  //   const role = this.mockRoles.find(r => r.id === id);
+  //   return of(role);
+  // }
 
   createRoles(newRole: Role): Observable<Role>{
     const roleWithId: Role = { 
@@ -340,7 +385,6 @@ export class Info implements OnInit {
     })
     this.mockRoles.push(roleWithId);
     console.log('Created role (mock):', roleWithId);
-    // window.location.reload(); // Replaced with loadGridData
     return of(roleWithId);
   }
 
@@ -367,11 +411,6 @@ export class Info implements OnInit {
       }
     })
     const initialLength = this.mockRoles.length;
-    // this.mockRoles = this.mockRoles.filter(r => r.id !== id);
-    // if (this.mockRoles.length < initialLength) {
-    //     console.log('Deleted role (mock) with id:', id);
-    //     return of(true);
-    // }
     return of(true);
   }
 }

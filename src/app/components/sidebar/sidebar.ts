@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, input, Output, signal } from '@angular/core';
 import { NavSection } from "../nav-section/nav-section";
 import { NavSubSection } from "../nav-sub-section/nav-sub-section";
 
@@ -38,11 +38,14 @@ export class Sidebar {
       subLinks : [
         {
           name: "Sales",
-          link: "/admin/sales"
+          link: "/admin/sales/table"
         }
       ]
     }
   ]
+
+  isAuthenticated = signal(localStorage.getItem('isAuthenticated'));
+  
 
   toggleSidebar(){
     this.toggleEvent.emit(false);

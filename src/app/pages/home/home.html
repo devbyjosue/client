@@ -1,6 +1,21 @@
-<section class="flex h-full w-screen p-10 justify-center items-center">
-    <!-- <app-table/> -->
-     <h1>SOY UN HOME HOLA</h1>
-     <dx-button
-      text="Click me"></dx-button>
+<section class="flex flex-col gap-4 h-full w-screen p-10 justify-center items-center">
+     <h1>SOY UN HOME</h1>
+     @if (!isAuthenticated()) {
+    <dx-button
+      text="Click me"
+      (click)="changeAccessStatus(!toggleAccess())"
+    ></dx-button> 
+    }
+
+      @if (isAuthenticated()) {
+        <div>
+            <h1>Acceso habilitado</h1>
+
+            <dx-button
+            (click)="changeAccessStatus(!toggleAccess())"
+            >
+              Remove Access
+            </dx-button>
+        </div>
+      }
 </section>

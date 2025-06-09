@@ -35,7 +35,8 @@ export class Header implements OnInit{
 
 
  navigateTo(route: string): void {
-  // this.router.navigate([route], { relativeTo: this.route });
+  console.log("Navigating to:", route);
+  this.router.navigate([route], { relativeTo: this.route });
   // this.headerTitle.set(null);
   // window.scrollTo(0, 0);
 
