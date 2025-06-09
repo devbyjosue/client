@@ -18,7 +18,6 @@
             [rowAlternationEnabled]="true"
             (onRowUpdating)="onRowUpdating($event)" 
             (onRowRemoving)="onRowRemoving($event)"
-            (onEditingStart)="onEditRow($event)" 
             keyExpr="id"  
             class="w-full" 
         >
@@ -39,10 +38,8 @@
                     [width]="700"
                     [height]="'auto'">
                 </dxo-popup>
-                <!-- If using a separate form, we might not need the form here -->
-                <!-- Or, we can customize the edit form within DxDataGrid -->
+              
             </dxo-editing>
-            <!-- Command column for edit/delete buttons is configured in columnConfigurations in .ts file -->
         </dx-data-grid>
     </div>
 

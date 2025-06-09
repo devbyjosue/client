@@ -38,8 +38,6 @@ export class Info implements OnInit {
   sectionSignal = signal("" as string | null);
   subSectionSignal = signal("" as string | null); // Added for easier access in template
   formSignal = signal(false);
-  editDataSignal = signal(null as any);
-  isFormToEdit = signal(false); // Default to false, true when editing
 
   // Adjusted for DxDataGrid: dataSource will hold the array of objects directly
   dataSource: any[] = []; 
@@ -100,54 +98,18 @@ export class Info implements OnInit {
   // The old getTableData can be removed or commented out if no longer needed by other parts.
 
   openForm(isEditing = false, data: any = null){
-    this.isFormToEdit.set(isEditing);
-    if(isEditing && data) {
-        // For DxDataGrid, 'data' in onRowClick or edit button click will be the row object
-        this.editDataSignal.set(data); 
-    } else {
-        this.editDataSignal.set(null); // Clear edit data if adding new
-    }
     this.formSignal.set(true);
   }
 
   closeTheForm(){
     this.formSignal.set(false);
-    this.isFormToEdit.set(false);
-    this.editDataSignal.set(null);
   }
 
   submitForm(entry: any){
     console.log("Form submitted with entry:", entry);
     const currentSubSection = this.subSectionSignal();
 
-    if (this.isFormToEdit() && this.editDataSignal()) {
-        const itemToEdit = this.editDataSignal();
-        if (currentSubSection === "users"){
-            const updatedUser: user = {
-                ...itemToEdit, // Spread existing data
-                name: entry.value1,
-                voucher: entry.value2,
-                roleId: parseInt(entry.value3),
-                updatedAt: new Date().toISOString()
-            };
-            this.updateUser(updatedUser).subscribe(() => {
-                console.log('User updated');
-                this.loadGridData(currentSubSection); // Refresh grid
-                this.closeTheForm();
-            });
-        } else if (currentSubSection === "roles"){
-            const updatedRole: Role = {
-                ...itemToEdit,
-                name: entry.value1,
-                updatedAt: new Date().toISOString()
-            };
-            this.updateRole(updatedRole).subscribe(() => {
-                console.log('Role updated');
-                this.loadGridData(currentSubSection); // Refresh grid
-                this.closeTheForm();
-            });
-        }
-    } else {
+  
         // Creating new item
         if (currentSubSection === "users"){
             const newUser: user = {
@@ -186,7 +148,7 @@ export class Info implements OnInit {
             console.log('Role created and added to array:', newRole);
             this.closeTheForm();
         }
-    }
+    
   }
   
   // baseUrl and baseUrlRoles are kept for potential future HTTP service integration
@@ -241,12 +203,7 @@ export class Info implements OnInit {
   }
   
   // This is triggered when the edit button in a row is clicked
-  onEditRow(e: any) {
-    console.log('Edit row clicked, using custom form:', e.data);
-    // e.data contains the data of the row to be edited
-    // We will use our existing form logic
-    this.openForm(true, e.data); // Re-enabled to open custom form for editing
-  }
+
 
   // FORM ACTIONS (deleteAction and editAction might be replaced by grid's internal buttons)
   // deleteAction and editAction are now handled by onRowRemoving and onEditRow with DxDataGrid command columns
