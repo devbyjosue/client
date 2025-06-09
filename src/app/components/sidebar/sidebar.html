@@ -12,7 +12,7 @@
     </div>
     <h1 class="text-4xl font-semibold text-black">Data Sections</h1>
 </div>
-    <section class="flex flex-col h-[90%] items-start pl-3 overflow-y-auto mt-5 ">
+    <section class="flex flex-col h-[90%] items-start pl-3 overflow-y-auto mt-5 gap-3">
         @for (section of sidebarLinks; track section) {
             <app-nav-section [sectionData]="section"/>
         } @empty {

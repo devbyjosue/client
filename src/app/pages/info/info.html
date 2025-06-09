@@ -1,30 +1,54 @@
-<section class="relative flex flex-col h-full w-screen p-10">
-    <div class="flex justify-end items-center p-2">
+<div class="info-container p-4 md:p-8 bg-gray-100 min-h-screen">
+    <div class="info-header flex justify-between items-center mb-6">
+        <h1 class="text-2xl md:text-3xl font-bold text-gray-700">{{ capitalize(subSectionSignal()) }}</h1>
         <button 
-        class="cursor-pointer bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded" 
-        (click)="openForm(formSignal())">
-            Add 
+            (click)="openForm()" 
+            class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded shadow-md hover:shadow-lg transition duration-150 ease-in-out">
+            Add {{ subSectionSignal()?.slice(0,-1) }}
         </button>
     </div>
-    <div class="absolute top-0 left-0 z-10 w-full h-full flex justify-center items-center "
-     *ngIf="formSignal()"
-     >
-     @if(editDataSignal()){
-        <app-table-form 
-        [formDataForEdition]="editDataSignal()"
-        (submitForm)="submitForm($event)"
-        (closeForm)="openForm(formSignal())"/>
-     }
-     @if(!editDataSignal()){
-        <app-table-form 
-        (submitForm)="submitForm($event)"
-        (closeForm)="openForm(formSignal())"/>
-     }
+
+    <!-- Replaced app-table with dx-data-grid -->
+    <div class="shadow-lg rounded-lg overflow-hidden">
+        <dx-data-grid
+            [dataSource]="dataSource" 
+            [columns]="columnConfigurations"
+            [showBorders]="true"
+            [hoverStateEnabled]="true"
+            [rowAlternationEnabled]="true"
+            (onRowUpdating)="onRowUpdating($event)" 
+            (onRowRemoving)="onRowRemoving($event)"
+            (onEditingStart)="onEditRow($event)" 
+            keyExpr="id"  
+            class="w-full" 
+        >
+            <dxo-paging [pageSize]="10"></dxo-paging>
+            <dxo-pager
+                [showPageSizeSelector]="true"
+                [allowedPageSizes]="[5, 10, 20]"
+                [showInfo]="true">
+            </dxo-pager>
+            <dxo-editing 
+                mode="popup" 
+                [allowUpdating]="true" 
+                [allowDeleting]="true"
+                [useIcons]="true">
+                <dxo-popup 
+                    title="Edit Data"
+                    [showTitle]="true"
+                    [width]="700"
+                    [height]="'auto'">
+                </dxo-popup>
+                <!-- If using a separate form, we might not need the form here -->
+                <!-- Or, we can customize the edit form within DxDataGrid -->
+            </dxo-editing>
+            <!-- Command column for edit/delete buttons is configured in columnConfigurations in .ts file -->
+        </dx-data-grid>
     </div>
 
-
-    <app-table 
-    (editAction)="editAction($event)"
-    (deleteAction)="deleteAction($event)"
-    [tableDataInput]="tableDataInput"/>
-</section>
+    <app-table-form 
+        *ngIf="formSignal()" 
+        (submitForm)="submitForm($event)" 
+        (closeForm)="closeTheForm()"
+    />
+</div>
