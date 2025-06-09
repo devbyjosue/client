@@ -1,12 +1,11 @@
 import { Component, EventEmitter, Input, Output, signal, OnInit, OnChanges, SimpleChanges } from '@angular/core';
 import { FormGroup, FormControl, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-// import { DxFormModule } from 'devextreme-angular'; // Removed: No longer using DevExtreme forms
 
 @Component({
   selector: 'app-table-form',
   standalone: true,
-  imports: [ReactiveFormsModule], // DxFormModule removed, ReactiveFormsModule is crucial
+  imports: [ReactiveFormsModule],
   templateUrl: './table-form.html',
   styleUrl: './table-form.css'
 })
@@ -43,16 +42,14 @@ export class TableForm implements OnInit, OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['formDataForEdition'] && this.formDataForEdition) {
-      // Ensure that if table data is part of formDataForEdition, it's also patched
       this.entryForm.patchValue({
-        table: this.formDataForEdition.table, // Assuming 'table' might also come from formDataForEdition
+        table: this.formDataForEdition.table, 
         value1: this.formDataForEdition.value1,
         value2: this.formDataForEdition.value2,
         value3: this.formDataForEdition.value3,
       });
     }
       if (changes['isFormEdition']) {
-      // console.log('isFormEdition changed:', this.isFormEdition());
     }
   }
 
@@ -63,18 +60,12 @@ export class TableForm implements OnInit, OnChanges {
     }
   }
 
-  // Removed: updateFormValue is no longer needed as Reactive Forms handle binding directly
-  // updateFormValue(e: any) {
-  //   if (e.dataField && this.entryForm.get(e.dataField)) {
-  //     this.entryForm.get(e.dataField)?.setValue(e.value, { emitEvent: false });
-  //   }
-  // }
+ 
 
-  onSubmitDxForm() { // Renamed from onSubmitDxForm to reflect new context, but kept for consistency
+  onSubmitDxForm() { 
     console.log('Submitting HTML Form:', this.entryForm.value);
-    // console.log('Submitting DxForm:', this.entryForm.value);
     this.submitForm.emit(this.entryForm.value);
-    this.toggleForm(); // Optionally close form on submit
+    this.toggleForm();
   }
 
   isEdition() {

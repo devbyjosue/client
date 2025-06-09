@@ -110,7 +110,6 @@ export class Info implements OnInit {
     const currentSubSection = this.subSectionSignal();
 
   
-        // Creating new item
         if (currentSubSection === "users"){
             const newUser: user = {
                 id: this.nextUserId++,
@@ -120,12 +119,8 @@ export class Info implements OnInit {
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString()
             };
-            // Instead of calling createUser, directly add to mockUsers and dataSource
-            // this.createUser(newUser).subscribe(() => {
-            //     console.log('User created');
-            //     this.loadGridData(currentSubSection); // Refresh grid
-            //     this.closeTheForm();
-            // });
+
+
             this.mockUsers.unshift(newUser);
             this.dataSource = [...this.mockUsers]; // Update dataSource to trigger UI refresh
             console.log('User created and added to array:', newUser);
@@ -137,41 +132,31 @@ export class Info implements OnInit {
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString()
             };
-            // Instead of calling createRoles, directly add to mockRoles and dataSource
-            // this.createRoles(newRole).subscribe(() => {
-            //     console.log('Role created');
-            //     this.loadGridData(currentSubSection); // Refresh grid
-            //     this.closeTheForm();
-            // });
+            
             this.mockRoles.unshift(newRole);
-            this.dataSource = [...this.mockRoles]; // Update dataSource to trigger UI refresh
+            this.dataSource = [...this.mockRoles]; 
             console.log('Role created and added to array:', newRole);
             this.closeTheForm();
         }
     
   }
   
-  // baseUrl and baseUrlRoles are kept for potential future HTTP service integration
   baseUrl = "http://localhost:5178/api/users";
   baseUrlRoles = "http://localhost:5178/api/roles";
 
-  // DxDataGrid event handlers for row edit/delete
   onRowUpdating(e: any) {
-    // This is for inline grid editing. If using a separate form, this might not be directly used.
-    // For now, our form is separate. If inline editing is desired, this needs more logic.
+    
     console.log('Row updating:', e);
-    // Prevent default grid behavior if we handle updates via our form
-    // e.cancel = true; 
   }
 
   onRowRemoving(e: any) {
-    console.log('Row removing:', e.data); // e.data contains the row object to be deleted
+    console.log('Row removing:', e.data); 
     const currentSubSection = this.subSectionSignal();
-    const idToDelete = e.data.id; // Assuming 'id' is the unique identifier
+    const idToDelete = e.data.id; 
 
     if (!idToDelete) {
         console.error('Cannot delete item without ID');
-        e.cancel = true; // Prevent DevExtreme from removing the row if ID is missing
+        e.cancel = true; 
         return;
     }
 
@@ -179,10 +164,8 @@ export class Info implements OnInit {
         this.deleteUser(idToDelete).subscribe(success => {
             if (success) {
                 console.log('User deleted successfully from mock');
-                // No need to call loadGridData if DevExtreme handles UI update on success
             } else {
                 console.error('Failed to delete user from mock');
-                e.cancel = true; // Prevent DevExtreme from removing row if delete failed
             }
         });
     } else if (currentSubSection === "roles"){
@@ -195,22 +178,13 @@ export class Info implements OnInit {
             }
         });
     }
-    // Note: If the delete operation in the service already reloads or updates the main datasource,
-    // and DevExtreme is bound to that datasource, the grid might refresh automatically.
-    // If not, you might need to manually refresh the grid's datasource or call loadGridData().
-    // For simplicity with mock data, we assume the filter operation in deleteUser/deleteRole updates the array,
-    // and DxDataGrid reflects this if [dataSource] is the same array instance or re-assigned.
+   
   }
   
-  // This is triggered when the edit button in a row is clicked
-
-
-  // FORM ACTIONS (deleteAction and editAction might be replaced by grid's internal buttons)
-  // deleteAction and editAction are now handled by onRowRemoving and onEditRow with DxDataGrid command columns
-  // These can be removed if not used elsewhere.
+  
 
   getUserHeaders(){
-    return usersHeaders; // Still can be used for reference or if needed elsewhere
+    return usersHeaders; 
   }
 
   getUsers(): Observable<user[]>{
