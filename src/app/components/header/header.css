@@ -1,0 +1,32 @@
+nav {
+      background: linear-gradient(90deg, rgba(0, 75, 120, 1) 0%, rgb(0, 0, 0) 50%, rgba(189, 0, 44, 1) 100%);
+      font-family: 'Segoe UI Light', Tahoma, Geneva, Verdana, sans-serif !important;
+}
+
+header .title-container .title h1 {
+    font-family: 'Segoe UI Light', Tahoma, Geneva, Verdana, sans-serif !important;
+    font-size: calc(0.6em + 0.6em) !important;
+    color: white !important;
+  }
+
+    .form-container {
+    border-bottom: 71px solid #00a3e0;
+    border-left: 1em solid transparent;
+    border-right: 1em solid transparent;
+    position: relative;
+  
+  }
+
+   .title{
+    position: absolute;
+    top: 35px;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    white-space: nowrap;
+  }
+
+  .title-container{
+    min-width: 150px;
+    height: 71px;
+    
+  }

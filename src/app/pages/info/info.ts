@@ -1,5 +1,4 @@
 import { Component, Input, OnInit, signal } from '@angular/core';
-import { Table } from '../../components/table/table'; // Removed Table component
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
@@ -66,23 +65,22 @@ export class Info implements OnInit {
     if (subSection === "users") {
         this.getUsers().subscribe(users => {
           this.dataSource = users;
-          // Define column configurations for users
           this.columnConfigurations = [
-            { dataField: 'id', caption: 'ID', visible: false }, // Hide ID by default, but useful for operations
+            { dataField: 'id', caption: 'ID', visible: false }, 
             { dataField: 'name', caption: 'Name' },
             { dataField: 'voucher', caption: 'Voucher' },
             { dataField: 'roleId', caption: 'Role ID' },
             { dataField: 'createdAt', caption: 'Created At', dataType: 'datetime' },
             { dataField: 'updatedAt', caption: 'Updated At', dataType: 'datetime' },
-            { type: 'buttons', buttons: ['edit', 'delete'] } // Add command buttons
+            { type: 'buttons', buttons: ['edit', 'delete'] } 
           ];
         });
     } else if (subSection === "roles") {
       this.getRoles().subscribe(roles => {
+        console.log("Roles:", roles);
           this.dataSource = roles;
-          // Define column configurations for roles
           this.columnConfigurations = [
-            { dataField: 'id', caption: 'ID', visible: false },
+            { dataField: 'id', caption: 'ID', visible: true },
             { dataField: 'name', caption: 'Name' },
             { dataField: 'createdAt', caption: 'Created At', dataType: 'datetime' },
             { dataField: 'updatedAt', caption: 'Updated At', dataType: 'datetime' },
@@ -94,8 +92,6 @@ export class Info implements OnInit {
 
   capitalize = capitalize;
 
-  // getTableData is replaced by loadGridData and direct dataSource binding
-  // The old getTableData can be removed or commented out if no longer needed by other parts.
 
   openForm(isEditing = false, data: any = null){
     this.formSignal.set(true);
@@ -120,6 +116,8 @@ export class Info implements OnInit {
                 updatedAt: new Date().toISOString()
             };
 
+            this.createUser(newUser)
+
 
             this.mockUsers.unshift(newUser);
             this.dataSource = [...this.mockUsers]; // Update dataSource to trigger UI refresh
@@ -133,6 +131,9 @@ export class Info implements OnInit {
                 updatedAt: new Date().toISOString()
             };
             
+            this.createRoles(newRole)
+
+
             this.mockRoles.unshift(newRole);
             this.dataSource = [...this.mockRoles]; 
             console.log('Role created and added to array:', newRole);
@@ -147,6 +148,48 @@ export class Info implements OnInit {
   onRowUpdating(e: any) {
     
     console.log('Row updating:', e);
+    
+    const currentSubSection = this.subSectionSignal();
+    const idToUpdate = e.key; 
+     if (!idToUpdate) {
+        console.error('Cannot update item without ID');
+        e.cancel = true; 
+        return;
+    }
+
+    if (currentSubSection === "users"){
+      const updatedUser: user = {
+        id: e.key,
+        name: e.newData.name ? e.newData.name : e.oldData.name,
+        voucher: e.newData.voucher ? e.newData.voucher : e.oldData.voucher,
+        roleId: e.newData.roleId ? e.newData.roleId : e.oldData.roleId,
+        createdAt: e.oldData.createdAt,
+        updatedAt: new Date().toISOString() 
+      }
+        this.updateUser(updatedUser).subscribe(updatedUser => {
+            if (updatedUser) {
+                console.log('User updated successfully from mock');
+            } else {
+                console.error('Failed to update user from mock');
+            }
+        });
+    }
+    else if (currentSubSection === "roles"){
+      const updatedRole: Role ={
+        id: e.key,
+        name: e.newData.name ? e.newData.name : e.oldData.name,
+        createdAt: e.oldData.createdAt,
+        updatedAt: new Date().toISOString() 
+      }
+        this.updateRole(updatedRole).subscribe(updatedRole => {
+            if (updatedRole) {
+                console.log('Role updated successfully from mock');
+            } else {
+                console.error('Failed to update role from mock');
+                e.cancel = true;
+            }
+        });
+    }
   }
 
   onRowRemoving(e: any) {
@@ -188,8 +231,18 @@ export class Info implements OnInit {
   }
 
   getUsers(): Observable<user[]>{
-    // return this.http.get<user[]>(this.baseUrl)
-    return of(this.mockUsers);
+     const currentUsers: user[] = []
+
+    this.http.get<user[]>(this.baseUrl).subscribe({
+      next: users => {
+        currentUsers.push(...users)
+      },
+      error: err => {
+        console.error('Error fetching users:', err)
+      }
+    })
+
+    return of(currentUsers)
   }
 
   getUserById(id: number): Observable<user | undefined>{
@@ -201,41 +254,62 @@ export class Info implements OnInit {
   createUser(newUser: user): Observable<user>{
     const userWithId: user = { 
         ...newUser, 
-        id: this.nextUserId++, 
         createdAt: new Date().toISOString(), 
         updatedAt: new Date().toISOString() 
     };
-    this.mockUsers.push(userWithId);
-    console.log('Created user (mock):', userWithId);
-    // window.location.reload(); // Replaced with loadGridData
+
+    this.http.post<Role[]>(this.baseUrl, userWithId).subscribe({
+      next: (response) => {
+        console.log('User created and added to array:', response)
+        this.loadGridData(this.subSectionSignal())
+      },
+      error: (err) => {
+        console.error('Error creating user:', err)
+      }
+    })
+    // this.mockUsers.push(userWithId);
+    // console.log('Created user (mock):', userWithId);
+    // // window.location.reload(); // Replaced with loadGridData
     return of(userWithId);
   }
 
   updateUser(userToUpdate: user): Observable<user | undefined>{
-    const index = this.mockUsers.findIndex(u => u.id === userToUpdate.id);
-    if (index !== -1) {
-      this.mockUsers[index] = { ...this.mockUsers[index], ...userToUpdate, updatedAt: new Date().toISOString() };
-      console.log('Updated user (mock):', this.mockUsers[index]);
-      return of(this.mockUsers[index]);
+    console.log('Updating User:', userToUpdate);
+   this.http.put<user>(this.baseUrl + "/" + userToUpdate.id, userToUpdate).subscribe({
+    next: (res) => {
+      console.log('User updated and added to array:', res)
+      this.loadGridData(this.subSectionSignal())
     }
-    console.error('User not found for update (mock):', userToUpdate);
-    return of(undefined); 
+   })
+
+   return of(userToUpdate);
   }
 
-  deleteUser(id: number): Observable<boolean>{ // Changed identifier to id: number for clarity
-    const initialLength = this.mockUsers.length;
-    this.mockUsers = this.mockUsers.filter(u => u.id !== id);
-    if (this.mockUsers.length < initialLength) {
-        console.log('Deleted user (mock) with id:', id);
-        return of(true);
-    }
-    console.error('User not found for deletion (mock) with id:', id);
-    return of(false);
+  deleteUser(id: number): Observable<boolean>{ 
+     this.http.delete(this.baseUrl+ "/" + id).subscribe({
+      next: () => {
+        console.log('User deleted successfully from server');
+      },
+      error: (err) => {
+        console.error('Error deleting User from server:', err);
+      }
+    })
+    return of(true);
   }
 
   getRoles(): Observable<Role[]>{
-    // return this.http.get<Role[]>(this.baseUrlRoles)
-    return of(this.mockRoles);
+    const currentRoles: Role[] = []
+
+    this.http.get<Role[]>(this.baseUrlRoles).subscribe({
+      next: roles => {
+        currentRoles.push(...roles)
+      },
+      error: err => {
+        console.error('Error fetching roles:', err)
+      }
+    })
+
+    return of(currentRoles)
   }
   
   getRoleHeaders(){
@@ -251,10 +325,19 @@ export class Info implements OnInit {
   createRoles(newRole: Role): Observable<Role>{
     const roleWithId: Role = { 
         ...newRole, 
-        id: this.nextRoleId++, 
         createdAt: new Date().toISOString(), 
         updatedAt: new Date().toISOString() 
     };
+
+    this.http.post<Role>(this.baseUrlRoles, roleWithId).subscribe({
+      next: (response) => {
+        console.log('Role created and added to array:', response)
+        this.loadGridData(this.subSectionSignal())
+      },
+      error: (err) => {
+        console.error('Error creating rol:', err)
+      }
+    })
     this.mockRoles.push(roleWithId);
     console.log('Created role (mock):', roleWithId);
     // window.location.reload(); // Replaced with loadGridData
@@ -262,24 +345,33 @@ export class Info implements OnInit {
   }
 
   updateRole(roleToUpdate: Role): Observable<Role | undefined>{
-    const index = this.mockRoles.findIndex(r => r.id === roleToUpdate.id);
-    if (index !== -1) {
-      this.mockRoles[index] = { ...this.mockRoles[index], ...roleToUpdate, updatedAt: new Date().toISOString() };
-      console.log('Updated role (mock):', this.mockRoles[index]);
-      return of(this.mockRoles[index]);
+    console.log('Updating role:', roleToUpdate);
+   this.http.put<Role>(this.baseUrlRoles + "/" + roleToUpdate.id, roleToUpdate).subscribe({
+    next: (res) => {
+      console.log('Role updated and added to array:', res)
+      this.loadGridData(this.subSectionSignal())
     }
-    console.error('Role not found for update (mock):', roleToUpdate);
-    return of(undefined);
+   })
+
+   return of(roleToUpdate);
   }
 
-  deleteRole(id: number): Observable<boolean>{ // Changed identifier to id: number for clarity
+  deleteRole(id: number): Observable<boolean>{ 
+
+    this.http.delete(this.baseUrlRoles+ "/" + id).subscribe({
+      next: () => {
+        console.log('Role deleted successfully from server');
+      },
+      error: (err) => {
+        console.error('Error deleting role from server:', err);
+      }
+    })
     const initialLength = this.mockRoles.length;
-    this.mockRoles = this.mockRoles.filter(r => r.id !== id);
-    if (this.mockRoles.length < initialLength) {
-        console.log('Deleted role (mock) with id:', id);
-        return of(true);
-    }
-    console.error('Role not found for deletion (mock) with id:', id);
-    return of(false);
+    // this.mockRoles = this.mockRoles.filter(r => r.id !== id);
+    // if (this.mockRoles.length < initialLength) {
+    //     console.log('Deleted role (mock) with id:', id);
+    //     return of(true);
+    // }
+    return of(true);
   }
 }

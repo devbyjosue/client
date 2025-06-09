@@ -2,10 +2,11 @@ import { Component, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { capitalize } from '../../../utils/capitalize';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-header',
-  imports: [],
+  imports: [CommonModule],
   templateUrl: './header.html',
   styleUrl: './header.css'
 })
@@ -30,5 +31,13 @@ export class Header implements OnInit{
           this.headerTitle.set(concat);
 });
  });
+ }
+
+
+ navigateTo(route: string): void {
+  // this.router.navigate([route], { relativeTo: this.route });
+  // this.headerTitle.set(null);
+  // window.scrollTo(0, 0);
+
  }
 }
