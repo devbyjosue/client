@@ -1,25 +1,36 @@
 <div class="info-container p-4 md:p-8 bg-gray-100 min-h-screen">
-    <div class="info-header flex justify-between items-center mb-6">
+    <!-- <div class="info-header flex justify-between items-center mb-6">
         <h1 class="text-2xl md:text-3xl font-bold text-gray-700">{{ capitalize(subSectionSignal()) }}</h1>
         <button 
             (click)="openForm()" 
             class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded shadow-md hover:shadow-lg transition duration-150 ease-in-out">
             Add {{ subSectionSignal()?.slice(0,-1) }}
         </button>
-    </div>
+    </div> -->
+    
+    <style>
+        .dx-datagrid-headers .dx-datagrid-table .dx-row > td {
+            @apply bg-gray-900 text-red-500 font-bold;
+        }
+    </style>
+    
 
-    <div class="shadow-lg rounded-lg overflow-hidden">
+    @defer () {
+        <div class="shadow-lg rounded-lg overflow-hidden">
         <dx-data-grid
-            [dataSource]="dataSource" 
-            [columns]="columnConfigurations"
+            [dataSource]="dataSource()" 
+            [columns]="columnConfigurations()"
             [showBorders]="true"
             [hoverStateEnabled]="true"
             [rowAlternationEnabled]="true"
             (onRowUpdating)="onRowUpdating($event)" 
             (onRowRemoving)="onRowRemoving($event)"
-            [keyExpr]="gridKeyField"  
-            class="w-full" 
+            (onRowInserting)="onRowInserting($event)"
+            [keyExpr]="gridKeyField()"  
+            class="w-full  "
         >
+        <!-- <dxi-column class="dx-datagrid-headers"></dxi-column> -->
+        
             <dxo-paging [pageSize]="10"></dxo-paging>
             <dxo-pager
                 [showPageSizeSelector]="true"
@@ -30,21 +41,35 @@
                 mode="popup" 
                 [allowUpdating]="true" 
                 [allowDeleting]="true"
+                [allowAdding]="true"
                 [useIcons]="true">
                 <dxo-popup 
-                    title="Edit Data"
+                    title="Handle Data"
                     [showTitle]="true"
                     [width]="700"
                     [height]="'auto'">
                 </dxo-popup>
-              
+                <dxo-form>
+                    <dxi-item *ngFor="let column of columnConfigurations()" 
+                             [dataField]="column.dataField"
+                             [editorOptions]="column.editorOptions">
+                    </dxi-item>
+                </dxo-form>
             </dxo-editing>
+           
         </dx-data-grid>
     </div>
+    } @placeholder {
+        <div></div>
+    } @loading {
+        <div class="h-screen w-full flex justify-center items-center text-4xl font-bold">
+            Loading data . . .
+        </div>
+    }
 
-    <app-table-form 
+    <!-- <app-table-form 
         *ngIf="formSignal()" 
         (submitForm)="submitForm($event)" 
         (closeForm)="closeTheForm()"
-    />
+    /> -->
 </div>

@@ -1,0 +1,9 @@
+.dx-header-row {
+    background-color: red !important;
+    color: red !important;
+  }
+
+.dx-datagrid-headers {
+  background-color: #337ab7 !important; /* Background color of the header */
+  color: white !important; /* Color of the column name text */
+}

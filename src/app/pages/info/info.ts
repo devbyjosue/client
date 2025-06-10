@@ -6,8 +6,9 @@ import { Observable, of } from 'rxjs';
 import { Role, TableData, user } from '../../../types';
 import { rolesHeaders, sections, subSections, usersHeaders } from '../../../mocks';
 import { TableForm } from "../../components/table-form/table-form";
-import { DxDataGridModule, DxButtonModule } from 'devextreme-angular';
+import { DxDataGridModule, DxButtonModule, DxColorBoxComponent } from 'devextreme-angular';
 import { capitalize } from '../../../utils/capitalize';
+import { DxoBackgroundColorComponent } from 'devextreme-angular/ui/nested';
 
 
 @Component({
@@ -36,18 +37,21 @@ export class Info implements OnInit {
   sectionSignal = signal("" as string | null);
   subSectionSignal = signal("" as string | null); 
   formSignal = signal(false);
-  gridKeyField: string = "id";
+  gridKeyField = signal<string>("id");
 
-  dataSource: any[] = []; 
-  columnConfigurations: any[] = []; 
+  dataSource = signal<any[]>([]); 
+  columnConfigurations = signal<any[]>([]);
 
   constructor(
     private route: ActivatedRoute,
     private http: HttpClient, 
-    private router: Router
-    ) {}
+    private router: Router,
+    ) {
+
+    }
 
   ngOnInit(): void {
+
     this.route.paramMap.subscribe(params => {
       const section = params.get('section');
       const subSection = params.get('subSection');
@@ -55,20 +59,23 @@ export class Info implements OnInit {
       this.subSectionSignal.set(subSection);
 
       if (subSection === 'sales') {
-        this.gridKeyField = 'salesOrderId';
+        this.gridKeyField.set('salesOrderId');
       } else if (subSection === 'users' || subSection === 'roles') {
-        this.gridKeyField = 'id';
+        this.gridKeyField.set('id');
       } else {
-        this.gridKeyField = 'id';
+        this.gridKeyField.set('id');
       }
 
 
 
-      this.loadGridData(subSection);
+      this.loadGridData(this.subSectionSignal());
     });
     
   }
 
+  ngOnChanges(){
+    this.loadGridData(this.subSectionSignal());
+  }
 
 
   loadGridData(subSection: string | null): void {
@@ -76,35 +83,40 @@ export class Info implements OnInit {
 
     if (subSection === "users") {
         this.getUsers().subscribe(users => {
-          this.dataSource = users;
-          this.columnConfigurations = [
-            { dataField: 'id', caption: 'ID', visible: true }, 
-            { dataField: 'name', caption: 'Name' },
-            { dataField: 'voucher', caption: 'Voucher' },
+          this.dataSource.set(users);
+          this.columnConfigurations.set(
+            [
+            { dataField: 'id', caption: 'ID', visible: false, class: "dx-datagrid-headers" }, 
+            { dataField: 'name', caption: 'Name',  class: "dx-datagrid-headers"},
+            { dataField: 'voucher', caption: 'UserID' },
             { dataField: 'roleId', caption: 'Role ID' },
             { dataField: 'createdAt', caption: 'Created At', dataType: 'datetime' },
             { dataField: 'updatedAt', caption: 'Updated At', dataType: 'datetime' },
             { type: 'buttons', buttons: ['edit', 'delete'] } 
-          ];
+          ]
+          )
         });
     } else if (subSection === "roles") {
       this.getRoles().subscribe(roles => {
         console.log("Roles:", roles);
-          this.dataSource = roles;
-          this.columnConfigurations = [
-            { dataField: 'id', caption: 'ID', visible: true },
+          this.dataSource.set(roles);
+          this.columnConfigurations.set(
+            [
+            { dataField: 'id', caption: 'ID', visible: false },
             { dataField: 'name', caption: 'Name' },
             { dataField: 'createdAt', caption: 'Created At', dataType: 'datetime' },
             { dataField: 'updatedAt', caption: 'Updated At', dataType: 'datetime' },
             { type: 'buttons', buttons: ['edit', 'delete'] }
-          ];
+          ]
+          )
         });
     }else if (subSection === "sales") {
     this.getSalesOrdersHeaders().subscribe(salesOrders => {
         console.log("Sales Orders:", salesOrders);
-        this.dataSource = salesOrders;
-        this.columnConfigurations = [
-          { dataField: 'salesOrderId', caption: 'ID', visible: true },
+        this.dataSource.set(salesOrders);
+        this.columnConfigurations.set(
+          [
+          { dataField: 'salesOrderId', caption: 'ID', visible: false},
           { dataField: 'revisionNumber', caption: 'Revision Number' },
           { dataField: 'orderDate', caption: 'Order Date', dataType: 'datetime' },
           { dataField: 'dueDate', caption: 'Due Date', dataType: 'datetime' },
@@ -120,7 +132,8 @@ export class Info implements OnInit {
           { dataField: 'comment', caption: 'Comment' },
           { dataField: 'modifiedDate', caption: 'Modified Date', dataType: 'datetime' },
           { type: 'buttons', buttons: ['edit', 'delete'] }
-        ];
+        ]
+        )
       });
     
     }
@@ -146,12 +159,14 @@ export class Info implements OnInit {
         if (currentSubSection === "users"){
             const newUser: user = {
                 id: this.nextUserId++,
-                name: entry.value1,
-                voucher: entry.value2,
-                roleId: parseInt(entry.value3),
+                name: entry.data.name,
+                voucher: entry.data.voucher,
+                roleId: parseInt(entry.data.roleId),
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString()
             };
+
+            console.log(newUser)
 
             this.createUser(newUser)
             this.loadGridData(currentSubSection);
@@ -159,13 +174,14 @@ export class Info implements OnInit {
             
             this.closeTheForm();
         } else if (currentSubSection === "roles"){
-            const newRole: Role = {
-                id: this.nextRoleId++,
-                name: entry.value1,
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString()
-            };
-            
+
+          const newRole: Role = {
+            id: this.nextRoleId++,
+            name: entry.data.name,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+          };
+          
             this.createRoles(newRole)
             this.loadGridData(currentSubSection);
 
@@ -257,22 +273,32 @@ export class Info implements OnInit {
     }
    
   }
+
+  onRowInserting(e: any){
+    this.submitForm(e)
+  }
+
+  // onCellPrepared(e: any){
+  //   if (e.rowType === 'header') {
+  //     e.cellElement.css('backgroundColor', 'blue');
+  //     e.cellElement.css('color', 'white');
+  //   }
+  // }
   
   
-getSalesOrdersHeaders(){
-  const salesOrdersHeaders: any[] = []
+  getSalesOrdersHeaders(){
+    const salesOrdersHeaders: any[] = []
 
-  this.http.get<any>(this.baseUrlSales).subscribe({
-    next: salesOrders => {
-      salesOrdersHeaders.push(...salesOrders);
-    },
-    error: (err) => {
-      console.error("Error fetching headers:", err);
-    }
-  })
-  return of(salesOrdersHeaders);
-}
-
+    this.http.get<any>(this.baseUrlSales).subscribe({
+      next: salesOrders => {
+        salesOrdersHeaders.push(...salesOrders);
+      },
+      error: (err) => {
+        console.error("Error fetching headers:", err);
+      }
+    })
+    return of(salesOrdersHeaders);
+  }
 
 
   getUserHeaders(){
@@ -300,7 +326,32 @@ getSalesOrdersHeaders(){
     return of(user);
   }
 
+  // getUserByName(name: string): Observable<user | undefined>{
+  //   const currentUser: user[] = []
+  //   this.http.get<user>(this.baseUrl + "/" + "userName"+ "/" + name).subscribe({
+  //     next: user => {
+  //       currentUser.push(user);
+  //       console.log("User:", user);
+  //     },
+  //     error: err => {
+  //       console.error("Error fetching user:", err);
+  //     }
+  //   })
+  //   return of(currentUser[0]);
+  // }
+
   createUser(newUser: user): Observable<user>{
+    // this.getUsers().subscribe(users => {
+    //   console.log("newuser:", newUser.name);
+    //   const userExists = users.some(user => {
+    //     console.log("user:", user.name);
+    //     return user.name.toLowerCase() == newUser.name.toLowerCase()
+    //   });     
+    //   userExists 
+    //     ? alert("User already exists") 
+    //     : console.log("User does not exist, creating new user");
+    // });
+
     const userWithId: user = { 
         ...newUser, 
         createdAt: new Date().toISOString(), 
@@ -308,12 +359,12 @@ getSalesOrdersHeaders(){
     };
 
     this.http.post<Role[]>(this.baseUrl, userWithId).subscribe({
-      next: (response) => {
+      next: (response: any) => {
         console.log('User created and added to array:', response)
         this.loadGridData(this.subSectionSignal())
       },
       error: (err) => {
-        console.error('Error creating user:', err)
+        alert("Error creating user: It Aready Exists");
       }
     })
     return of(userWithId);
@@ -381,6 +432,7 @@ getSalesOrdersHeaders(){
       },
       error: (err) => {
         console.error('Error creating rol:', err)
+        alert("Error creating user: It Aready Exists");
       }
     })
     this.mockRoles.push(roleWithId);

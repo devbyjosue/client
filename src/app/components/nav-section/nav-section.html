@@ -24,7 +24,7 @@ class="flex gap-4 w-full h-8 justify-center items-center cursor-pointer hover:bg
     
     </div>
     
-    <h2 class="text-sm font-semibold text-black">{{sectionData.name}}</h2>
+    <h4 class="text-sm font-semibold text-black">{{sectionData.name}}</h4>
     
 </div>
 
@@ -33,7 +33,9 @@ class="flex gap-4 w-full h-8 justify-center items-center cursor-pointer hover:bg
 <section class="h-grow">
     @if (isNavSectionOpen()) {
         @for(subSection of sectionData.subLinks; track subSection) {
-            <app-nav-sub-section [route]="subSection.link" [name]="subSection.name"/>
+            <app-nav-sub-section 
+            [route]="subSection.link" 
+            [name]="subSection.name"/>
         }
       }
 </section>
