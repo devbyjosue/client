@@ -2,7 +2,7 @@ export type user = {
   id?: number;
   name: string;
   voucher: string;
-  roleId: number;
+  roleName: string;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -35,6 +35,22 @@ export type SalesOrder = {
   totalDue: number;
   comment: string;
   modifiedDate: string;
+}
+
+export type Menu = {
+  id?: number;
+  name: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export type MenuRole = {
+  id?: number;
+  menuId: number;
+  menu: Menu;
+  roleId: number;
+  role: Role;
+  
 }
 
 

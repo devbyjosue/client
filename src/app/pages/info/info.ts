@@ -3,7 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { Observable, of } from 'rxjs';
-import { Role, TableData, user } from '../../../types';
+import { Menu, MenuRole, Role, TableData, user } from '../../../types';
 import { rolesHeaders, sections, subSections, usersHeaders } from '../../../mocks';
 import { TableForm } from "../../components/table-form/table-form";
 import { DxDataGridModule, DxButtonModule, DxColorBoxComponent } from 'devextreme-angular';
@@ -13,7 +13,7 @@ import { DxoBackgroundColorComponent } from 'devextreme-angular/ui/nested';
 
 @Component({
   selector: 'app-info',
-  imports: [CommonModule, HttpClientModule, TableForm, DxDataGridModule, DxButtonModule],
+  imports: [CommonModule, HttpClientModule, DxDataGridModule, DxButtonModule],
   templateUrl: './info.html',
   styleUrl: './info.css'
 })
@@ -21,9 +21,9 @@ export class Info implements OnInit {
 
   
   private mockUsers: user[] = [
-    { id: 1, name: 'Alice Wonderland', voucher: 'VOUCHER001', roleId: 1, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-    { id: 2, name: 'Bob The Builder', voucher: 'VOUCHER002', roleId: 2, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-    { id: 3, name: 'Charlie Chaplin', voucher: 'VOUCHER003', roleId: 1, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }
+    { id: 1, name: 'Alice Wonderland', voucher: 'VOUCHER001', roleName: "user", createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+    { id: 2, name: 'Bob The Builder', voucher: 'VOUCHER002', roleName: "user", createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+    { id: 3, name: 'Charlie Chaplin', voucher: 'VOUCHER003', roleName: "user", createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }
   ];
   private nextUserId = 4;
 
@@ -89,7 +89,7 @@ export class Info implements OnInit {
             { dataField: 'id', caption: 'ID', visible: false, class: "dx-datagrid-headers" }, 
             { dataField: 'name', caption: 'Name',  class: "dx-datagrid-headers"},
             { dataField: 'voucher', caption: 'UserID' },
-            { dataField: 'roleId', caption: 'Role ID' },
+            { dataField: 'roleName', caption: 'Role Name' },
             { dataField: 'createdAt', caption: 'Created At', dataType: 'datetime' },
             { dataField: 'updatedAt', caption: 'Updated At', dataType: 'datetime' },
             { type: 'buttons', buttons: ['edit', 'delete'] } 
@@ -98,7 +98,6 @@ export class Info implements OnInit {
         });
     } else if (subSection === "roles") {
       this.getRoles().subscribe(roles => {
-        console.log("Roles:", roles);
           this.dataSource.set(roles);
           this.columnConfigurations.set(
             [
@@ -137,6 +136,39 @@ export class Info implements OnInit {
       });
     
     }
+    if (subSection === "menus"){
+      this.getMenus().subscribe(menus => {
+        console.log("Menus:", menus);
+          this.dataSource.set(menus);
+          this.columnConfigurations.set(
+            [
+            { dataField: 'id', caption: 'ID', visible: false },
+            { dataField: 'name', caption: 'Name' },
+            { dataField: 'createdAt', caption: 'Created At', dataType: 'datetime' },
+            { dataField: 'updatedAt', caption: 'Updated At', dataType: 'datetime' },
+            { type: 'buttons', buttons: ['edit', 'delete'] }
+          ]
+          )
+        });
+    }
+    if (subSection === "menu-roles"){
+      this.getMenuRoles().subscribe(menuRoles => {
+        console.log("MenuRoles:", menuRoles);
+          this.dataSource.set(menuRoles);
+          this.columnConfigurations.set(
+            [
+            { dataField: 'id', caption: 'ID', visible: false },
+            { dataField: 'name', caption: 'Menus' },
+            { dataField: 'roles', caption: 'Roles' },
+
+            // { dataField: 'createdAt', caption: 'Created At', dataType: 'datetime' },
+            // { dataField: 'updatedAt', caption: 'Updated At', dataType: 'datetime' },
+            { type: 'buttons', buttons: ['edit', 'delete'] }
+          ]
+          )
+        });
+    }
+    
 
   }
 
@@ -157,11 +189,13 @@ export class Info implements OnInit {
 
   
         if (currentSubSection === "users"){
+          //HERE I NEED TO GET THE ROLEID BACK 
+
             const newUser: user = {
                 id: this.nextUserId++,
                 name: entry.data.name,
                 voucher: entry.data.voucher,
-                roleId: parseInt(entry.data.roleId),
+                roleName: entry.data.roleName,
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString()
             };
@@ -194,6 +228,7 @@ export class Info implements OnInit {
   baseUrl = "http://localhost:5178/api/users";
   baseUrlRoles = "http://localhost:5178/api/roles";
   baseUrlSales = "http://localhost:5178/api/sales";
+  baseUrlMenus = "http://localhost:5178/api/menus";
 
   onRowUpdating(e: any) {
     
@@ -212,7 +247,7 @@ export class Info implements OnInit {
         id: e.key,
         name: e.newData.name ? e.newData.name : e.oldData.name,
         voucher: e.newData.voucher ? e.newData.voucher : e.oldData.voucher,
-        roleId: e.newData.roleId ? e.newData.roleId : e.oldData.roleId,
+        roleName: e.newData.roleName ? e.newData.roleName : e.oldData.roleName,
         createdAt: e.oldData.createdAt,
         updatedAt: new Date().toISOString() 
       }
@@ -465,4 +500,35 @@ export class Info implements OnInit {
     const initialLength = this.mockRoles.length;
     return of(true);
   }
+
+
+  getMenus(): Observable<Menu[]>{
+    const currentMenus: Menu[] = []
+
+   this.http.get<Menu[]>(this.baseUrlMenus).subscribe({
+     next: menus => {
+      currentMenus.push(...menus)
+     },
+     error: err => {
+       console.error('Error fetching menus:', err)
+     }
+   })
+
+   return of(currentMenus)
+ }
+
+ getMenuRoles(): Observable<MenuRole[]>{
+  const currentMenuRoles: MenuRole[] = []
+
+ this.http.get<MenuRole[]>(this.baseUrlMenus+"/"+"menu-roles").subscribe({
+   next: menuRoles => {
+    currentMenuRoles.push(...menuRoles)
+   },
+   error: err => {
+     console.error('Error fetching menuRoles:', err)
+   }
+ })
+
+ return of(currentMenuRoles)
+}
 }

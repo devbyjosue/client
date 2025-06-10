@@ -29,6 +29,15 @@ export class Sidebar {
         {
           name: "Roles",
           link: "/configuration/roles"
+        },
+        
+        {
+          name: "Menu",
+          link: "/configuration/menus"
+        },
+        {
+          name: "MenuRoles",
+          link: "/configuration/menu-roles"
         }
       ]
     },
