@@ -1,0 +1,8 @@
+::ng-deep .dx-datagrid-rowsview td {
+    border-left: none !important;
+    border-right: none !important;
+}
+
+::ng-deep .dx-datagrid-rowsview td:last-child {
+    border-right: none !important;
+}

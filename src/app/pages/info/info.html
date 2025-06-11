@@ -1,12 +1,5 @@
-<div class="info-container p-4 md:p-8 bg-gray-100 min-h-screen">
-    <!-- <div class="info-header flex justify-between items-center mb-6">
-        <h1 class="text-2xl md:text-3xl font-bold text-gray-700">{{ capitalize(subSectionSignal()) }}</h1>
-        <button 
-            (click)="openForm()" 
-            class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded shadow-md hover:shadow-lg transition duration-150 ease-in-out">
-            Add {{ subSectionSignal()?.slice(0,-1) }}
-        </button>
-    </div> -->
+<div class="info-container p-4 md:p-8 bg-white min-h-screen">
+
     
     <style>
         .dx-datagrid-headers .dx-datagrid-table .dx-row > td {
@@ -15,12 +8,12 @@
     </style>
     
 
-    @defer () {
+
         <div class="shadow-lg rounded-lg overflow-hidden">
         <dx-data-grid
             [dataSource]="dataSource()" 
             [columns]="columnConfigurations()"
-            [showBorders]="true"
+            [showBorders]="false"
             [hoverStateEnabled]="true"
             [rowAlternationEnabled]="true"
             (onRowUpdating)="onRowUpdating($event)" 
@@ -51,26 +44,44 @@
                     [height]="'auto'">
                 </dxo-popup>
                 <dxo-form>
-                    <dxi-item *ngFor="let column of columnConfigurations()" 
+                   
+                    @for (column of columnConfigurations(); track column.dataField ){
+                        
+                        <!-- @if (column.dataField === 'id' || column.dataField === 'updatedAt'){
+                            <div></div>
+                        } -->
+                        @if (column.dataField == 'roleName'){
+                            <dxi-item 
+                            dataField="roleName" 
+                            editorType="dxSelectBox"
+                            [editorOptions]="{
+                                dataSource: rolesAvailables(), 
+                                valueExpr: 'roleName', 
+                                displayExpr: 'roleName', 
+                                placeholder: 'Select a Role',
+                                searchEnabled: true
+                            }">
+                            <dxo-label [text]="column.caption || 'Role Name'"></dxo-label> 
+                        </dxi-item>
+                
+                        }
+                        
+                        @else if (column.dataField != 'id' || column.dataField != 'updatedAt' ) {
+                            <dxi-item 
+                                [dataField]="column.dataField"
+                                [editorOptions]="column.editorOptions">
+                            </dxi-item>
+                        }
+                    }
+                    <!-- <dxi-item *ngFor="let column of columnConfigurations()" 
                              [dataField]="column.dataField"
                              [editorOptions]="column.editorOptions">
-                    </dxi-item>
+                    </dxi-item> -->
                 </dxo-form>
             </dxo-editing>
            
         </dx-data-grid>
     </div>
-    } @placeholder {
-        <div></div>
-    } @loading {
-        <div class="h-screen w-full flex justify-center items-center text-4xl font-bold">
-            Loading data . . .
-        </div>
-    }
 
-    <!-- <app-table-form 
-        *ngIf="formSignal()" 
-        (submitForm)="submitForm($event)" 
-        (closeForm)="closeTheForm()"
-    /> -->
+
 </div>
