@@ -2,7 +2,7 @@ import { Component, Input, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
-import { Observable, of } from 'rxjs';
+import { map, Observable, of } from 'rxjs';
 import { Menu, MenuRole, Role, TableData, user } from '../../../types';
 import { rolesHeaders, sections, subSections, usersHeaders } from '../../../mocks';
 import { TableForm } from "../../components/table-form/table-form";
@@ -190,19 +190,26 @@ export class Info implements OnInit {
   
         if (currentSubSection === "users"){
           //HERE I NEED TO GET THE ROLEID BACK 
+            this.getRoleByName(entry.data.roleName).subscribe(role => {
+              if (!role){
+                alert("Unable to create User, not a valid role")
+                return 
+              }
+              const newUser = {
+                  id: this.nextUserId++,
+                  name: entry.data.name,
+                  voucher: entry.data.voucher,
+                  roleId: role?.id,
+                  createdAt: new Date().toISOString(),
+                  updatedAt: new Date().toISOString()
+              };
 
-            const newUser: user = {
-                id: this.nextUserId++,
-                name: entry.data.name,
-                voucher: entry.data.voucher,
-                roleName: entry.data.roleName,
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString()
-            };
+              console.log(newUser)
+              this.createUser(newUser)
+            })
 
-            console.log(newUser)
 
-            this.createUser(newUser)
+
             this.loadGridData(currentSubSection);
 
             
@@ -375,17 +382,8 @@ export class Info implements OnInit {
   //   return of(currentUser[0]);
   // }
 
-  createUser(newUser: user): Observable<user>{
-    // this.getUsers().subscribe(users => {
-    //   console.log("newuser:", newUser.name);
-    //   const userExists = users.some(user => {
-    //     console.log("user:", user.name);
-    //     return user.name.toLowerCase() == newUser.name.toLowerCase()
-    //   });     
-    //   userExists 
-    //     ? alert("User already exists") 
-    //     : console.log("User does not exist, creating new user");
-    // });
+  createUser(newUser: user | any): Observable<user>{
+  
 
     const userWithId: user = { 
         ...newUser, 
@@ -443,6 +441,16 @@ export class Info implements OnInit {
 
     return of(currentRoles)
   }
+
+  getRoleByName(name: string): Observable<Role | undefined > {
+    return this.http.get<Role>(`${this.baseUrlRoles}/name/${name}`).pipe(
+      map(role => {
+        console.log(role)
+        return role
+      })
+    );
+  }
+  
   
   getRoleHeaders(){
     return rolesHeaders; 
