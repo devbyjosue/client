@@ -320,12 +320,13 @@ export class Info implements OnInit {
     this.submitForm(e)
   }
 
-  // onCellPrepared(e: any){
-  //   if (e.rowType === 'header') {
-  //     e.cellElement.css('backgroundColor', 'blue');
-  //     e.cellElement.css('color', 'white');
-  //   }
-  // }
+  onCellPrepared(e: any) : void {
+    //color
+    if (e.rowType === 'header') {
+      e.cellElement.style.cssText = 'background-color: #004b78; color: white;';
+      e.cellElement.css('color', 'white');
+    }
+  }
   
   
   getSalesOrdersHeaders(){
