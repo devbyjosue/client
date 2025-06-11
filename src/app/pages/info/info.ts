@@ -177,6 +177,15 @@ export class Info implements OnInit {
 
   capitalize = capitalize;
 
+  onEditorPreparing(e:any) {
+    if (e.dataField === "id" || e.dataField === "updatedAt") {
+      e.editorOptions.visible = false;
+      e.editorOptions.label = { visible: false };
+      e.editorOptions.label.visible = false
+      console.log(e)
+    }
+  }
+  
 
   openForm(isEditing = false, data: any = null){
     this.formSignal.set(true);

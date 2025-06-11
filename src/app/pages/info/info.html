@@ -20,6 +20,7 @@
             (onRowRemoving)="onRowRemoving($event)"
             (onRowInserting)="onRowInserting($event)"
             (onCellPrepared)="onCellPrepared($event)"
+            (onEditorPreparing)="onEditorPreparing($event)"
             [keyExpr]="gridKeyField()"  
             class="w-full  "
         >
@@ -43,7 +44,8 @@
                     [width]="700"
                     [height]="'auto'">
                 </dxo-popup>
-                <dxo-form>
+                <dxo-form
+                >
                    
                     @for (column of columnConfigurations(); track column.dataField ){
                         
@@ -66,7 +68,7 @@
                 
                         }
                         
-                        @else if (column.dataField != 'id' || column.dataField != 'updatedAt' ) {
+                        @else if (column.dataField != 'ID' || column.dataField != 'updatedAt' ) {
                             <dxi-item 
                                 [dataField]="column.dataField"
                                 [editorOptions]="column.editorOptions">
