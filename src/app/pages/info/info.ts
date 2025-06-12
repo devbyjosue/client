@@ -1,40 +1,31 @@
-import { Component, Input, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
-import { CommonModule } from '@angular/common';
 import { catchError, map, Observable, of } from 'rxjs';
 import { Menu, MenuRole, Role, TableData, user } from '../../../types';
-import { rolesHeaders, sections, subSections, usersHeaders } from '../../../mocks';
-import { DxDataGridModule, DxButtonModule, DxColorBoxComponent, DxSelectBoxComponent, DxSelectBoxModule , DxFormModule, DxTextBoxModule } from 'devextreme-angular';
+import { Component, Input, OnInit, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { DxDataGridModule, DxButtonModule, DxSelectBoxModule , DxFormModule, DxTextBoxModule } from 'devextreme-angular';
 import { capitalize } from '../../../utils/capitalize';
+import { MenuService } from '../../services/menu.service'; 
 import { DxoBackgroundColorComponent } from 'devextreme-angular/ui/nested';
+import { UserService } from '../../services/user.service'; 
+import { RoleService } from '../../services/role.service'; 
+import { SalesService } from '../../services/sales.service'; 
 
 
 @Component({
   selector: 'app-info',
-  imports: [CommonModule, HttpClientModule, 
+  imports: [
+    CommonModule, 
     DxDataGridModule, DxButtonModule, 
     DxSelectBoxModule, DxFormModule,
-    DxTextBoxModule ],
+    DxTextBoxModule 
+  ],
   templateUrl: './info.html',
   styleUrl: './info.css'
 })
 export class Info implements OnInit {
 
-  
-  private mockUsers: user[] = [
-    { id: 1, name: 'Alice Wonderland', voucher: 'VOUCHER001', roleName: "user", createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-    { id: 2, name: 'Bob The Builder', voucher: 'VOUCHER002', roleName: "user", createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-    { id: 3, name: 'Charlie Chaplin', voucher: 'VOUCHER003', roleName: "user", createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }
-  ];
-  private nextUserId = 4;
 
-  private mockRoles: Role[] = [
-    { id: 1, name: 'Admin', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-    { id: 2, name: 'Editor', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-    { id: 3, name: 'Viewer', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }
-  ];
-  private nextRoleId = 4;
 
   sectionSignal = signal("" as string | null);
   subSectionSignal = signal("" as string | null); 
@@ -47,8 +38,11 @@ export class Info implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    private http: HttpClient, 
     private router: Router,
+    private userService: UserService, 
+    private roleService: RoleService, 
+    private menuService: MenuService, 
+    private salesService: SalesService 
     ) {
 
     }
@@ -76,16 +70,12 @@ export class Info implements OnInit {
     
   }
 
-  // ngOnChanges(){
-  //   this.loadGridData(this.subSectionSignal());
-  // }
-
 
   loadGridData(subSection: string | null): void {
     if (!subSection) return;
 
     if (subSection === "users") {
-        this.getUsers().subscribe(users => {
+        this.userService.getUsers().subscribe(users => { // Use userService
           this.dataSource.set(users);
           this.columnConfigurations.set(
             [
@@ -100,7 +90,7 @@ export class Info implements OnInit {
           )
         });
     } else if (subSection === "roles") {
-      this.getRoles().subscribe(roles => {
+      this.roleService.getRoles().subscribe(roles => { // Use roleService
           this.dataSource.set(roles);
           this.columnConfigurations.set(
             [
@@ -113,7 +103,7 @@ export class Info implements OnInit {
           )
         });
     }else if (subSection === "sales") {
-    this.getSalesOrdersHeaders().subscribe(salesOrders => {
+    this.salesService.getSalesOrdersHeaders().subscribe(salesOrders => { // Use salesService
         console.log("Sales Orders:", salesOrders);
         this.dataSource.set(salesOrders);
         this.columnConfigurations.set(
@@ -140,7 +130,7 @@ export class Info implements OnInit {
     
     }
     if (subSection === "menus"){
-      this.getMenus().subscribe(menus => {
+      this.menuService.getMenus().subscribe(menus => { // Use menuService
         console.log("Menus:", menus);
           this.dataSource.set(menus);
           this.columnConfigurations.set(
@@ -155,7 +145,7 @@ export class Info implements OnInit {
         });
     }
     if (subSection === "menu-roles"){
-      this.getMenuRoles().subscribe(menuRoles => {
+      this.menuService.getMenuRoles().subscribe(menuRoles => { // Use menuService
         console.log("MenuRoles:", menuRoles);
           this.dataSource.set(menuRoles);
           this.columnConfigurations.set(
@@ -196,12 +186,6 @@ export class Info implements OnInit {
   }
 
   
-  
-  baseUrl = "http://localhost:5178/api/users";
-  baseUrlRoles = "http://localhost:5178/api/roles";
-  baseUrlSales = "http://localhost:5178/api/sales";
-  baseUrlMenus = "http://localhost:5178/api/menus";
-
   onRowUpdating(e: any) {
     
     console.log('Row updating:', e);
@@ -227,7 +211,7 @@ export class Info implements OnInit {
       const roleName = e.newData.roleName ?? e.oldData.roleName;
 
       // First get the roleId by searching for the role name
-      this.getRoleByName(roleName).subscribe({
+      this.roleService.getRoleByName(roleName).subscribe({
         next: (role) => {
           if (!role) {
             console.error('Role not found');
@@ -239,7 +223,7 @@ export class Info implements OnInit {
             roleId: role.id
           };
 
-          this.updateUser(updatedUser).subscribe({
+          this.userService.updateUser(updatedUser).subscribe({ // Use userService
             next: (response) => {
               console.log('User updated successfully');
               this.loadGridData(this.subSectionSignal());
@@ -261,11 +245,12 @@ export class Info implements OnInit {
         createdAt: e.oldData.createdAt,
         updatedAt: new Date().toISOString() 
       }
-        this.updateRole(updatedRole).subscribe(updatedRole => {
-            if (updatedRole) {
-                console.log('Role updated successfully from mock');
+        this.roleService.updateRole(updatedRole).subscribe(updatedRoleResponse => { // Use roleService
+            if (updatedRoleResponse) {
+                console.log('Role updated successfully');
+                this.loadGridData(this.subSectionSignal());
             } else {
-                console.error('Failed to update role from mock');
+                console.error('Failed to update role');
                 e.cancel = true;
             }
         });
@@ -276,23 +261,25 @@ export class Info implements OnInit {
         createdAt: e.oldData.createdAt,
         updatedAt: new Date().toISOString() 
       }
-      this.updateMenu(updatedMenu).subscribe(updatedMenu => {
-        if (updatedMenu) {
-            console.log('Role updated successfully');
+      this.menuService.updateMenu(updatedMenu).subscribe(updatedMenuResponse => { // Use menuService
+        if (updatedMenuResponse) {
+            console.log('Menu updated successfully');
+            this.loadGridData(this.subSectionSignal());
         } else {
-            console.error('Failed to update role');
+            console.error('Failed to update menu');
             e.cancel = true;
         }
     });
       
     } else if (currentSubSection === "menu-roles"){
      
-      this.updateMenuRoles(e.key, e.newData.roles).subscribe(menuRole =>{
+      this.menuService.updateMenuRoles(e.key, e.newData.roles).subscribe(menuRole =>{ // Use menuService
         console.log(menuRole)
-        if (menuRole){
+        if (menuRole && menuRole.length > 0){ // Check if menuRole is not empty
           console.log('MenuRole updated successfully')
+          this.loadGridData(this.subSectionSignal());
         } else {
-          console.error('Failed to update MenuRole')
+          console.error('Failed to update MenuRole or no roles returned')
           e.cancel = true;
         }
       })
@@ -311,28 +298,31 @@ export class Info implements OnInit {
     }
 
     if (currentSubSection === "users"){
-        this.deleteUser(idToDelete).subscribe(success => {
+        this.userService.deleteUser(idToDelete).subscribe(success => { 
             if (success) {
-                console.log('User deleted successfully from mock');
+                console.log('User deleted successfully');
+                 this.loadGridData(this.subSectionSignal()); 
             } else {
-                console.error('Failed to delete user from mock');
+                console.error('Failed to delete user');
             }
         });
     } else if (currentSubSection === "roles"){
-        this.deleteRole(idToDelete).subscribe(success => {
+        this.roleService.deleteRole(idToDelete).subscribe(success => { 
             if (success) {
-                console.log('Role deleted successfully from mock');
+                console.log('Role deleted successfully');
+                this.loadGridData(this.subSectionSignal()); 
             } else {
-                console.error('Failed to delete role from mock');
+                console.error('Failed to delete role');
                 e.cancel = true;
             }
         });
     } else if (currentSubSection === "menus"){
-      this.deleteMenu(idToDelete).subscribe(success => {
+      this.menuService.deleteMenu(idToDelete).subscribe(success => { 
         if (success) {
-            console.log('User deleted successfully from mock');
+            console.log('Menu deleted successfully');
+            this.loadGridData(this.subSectionSignal()); 
         } else {
-            console.error('Failed to delete user from mock');
+            console.error('Failed to delete menu');
         }
     });
     } 
@@ -346,13 +336,12 @@ export class Info implements OnInit {
   
         if (currentSubSection === "users"){
           //HERE I NEED TO GET THE ROLEID BACK 
-            this.getRoleByName(entry.data.roleName).subscribe(role => {
+            this.roleService.getRoleByName(entry.data.roleName).subscribe(role => {
               if (!role){
                 alert("Unable to create User, not a valid role")
                 return 
               }
               const newUser = {
-                  id: this.nextUserId++,
                   name: entry.data.name,
                   voucher: entry.data.voucher,
                   roleId: role?.id,
@@ -361,29 +350,35 @@ export class Info implements OnInit {
               };
 
               console.log(newUser)
-              this.createUser(newUser)
+              this.userService.createUser(newUser).subscribe({
+                next: (createdUser) => {
+                  console.log('User created successfully:', createdUser);
+                  this.loadGridData(currentSubSection);
+                  this.closeTheForm();
+                },
+                error: (error) => {
+                  console.error('Failed to create user:', error);
+                }
+              });
             })
-
-
-
-            this.loadGridData(currentSubSection);
-
-            
-            this.closeTheForm();
         } else if (currentSubSection === "roles"){
 
           const newRole: Role = {
-            id: this.nextRoleId++,
             name: entry.data.name,
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString()
           };
           
-            this.createRoles(newRole)
-            this.loadGridData(currentSubSection);
-
+            this.roleService.createRole(newRole).subscribe(createdRole => { 
+              if (createdRole) {
+                console.log('Role created successfully:', createdRole);
+                this.loadGridData(currentSubSection);
+                this.closeTheForm();
+              } else {
+                console.error('Failed to create role');
+              }
+            });
             
-            this.closeTheForm();
         }
         else if (currentSubSection === "menus"){
           const newMenu: Menu = {
@@ -391,9 +386,15 @@ export class Info implements OnInit {
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString()
           }
-          this.createMenu(newMenu)
-          this.loadGridData(currentSubSection);
-          this.closeTheForm();
+          this.menuService.createMenu(newMenu).subscribe(createdMenu => { 
+            if (createdMenu) {
+              console.log('Menu created successfully:', createdMenu);
+              this.loadGridData(currentSubSection);
+              this.closeTheForm();
+            } else {
+              console.error('Failed to create menu');
+            }
+          });
         }
   }
 
@@ -409,232 +410,6 @@ export class Info implements OnInit {
       }
   }
   }
-  
-  
-  getSalesOrdersHeaders(): Observable<any[]>{
-
-    return this.http.get<any[]>(this.baseUrlSales).pipe( 
-      catchError(err => {
-        console.error("Error fetching headers:", err);
-        return of([]); 
-      })
-    );
-  }
-
-
-  getUserHeaders(){
-    return usersHeaders; 
-  }
-
-  getUsers(): Observable<user[]>{
-    //  const currentUsers: user[] = [] // Remove this line
-
-    return this.http.get<user[]>(this.baseUrl).pipe( // Return the observable directly
-      catchError(err => {
-        console.error('Error fetching users:', err);
-        return of([]); // Return an empty array on error
-      })
-    );
-  }
-
-  getUserById(id: number): Observable<user | undefined>{
-    // return this.http.get(`${this.baseUrl}/${id}`);
-    const user = this.mockUsers.find(u => u.id === id);
-    return of(user);
-  }
-
-  createUser(newUser: user | any): Observable<user>{
-  
-
-    const userWithId: user = { 
-        ...newUser, 
-        createdAt: new Date().toISOString(), 
-        updatedAt: new Date().toISOString() 
-    };
-
-    this.http.post<Role[]>(this.baseUrl, userWithId).subscribe({
-      next: (response: any) => {
-        console.log('User created and added to array:', response)
-        this.loadGridData(this.subSectionSignal())
-      },
-      error: (err) => {
-        alert("Error creating user: It Aready Exists");
-      }
-    })
-    return of(userWithId);
-  }
-
-  updateUser(userToUpdate: user | any): Observable<user | undefined>{
-    console.log('Updating User:', userToUpdate);
-   this.http.put<user>(this.baseUrl + "/" + userToUpdate.id, userToUpdate).subscribe({
-    next: (res) => {
-      console.log('User updated and added to array:', res)
-      this.loadGridData(this.subSectionSignal())
-    }
-   })
-
-   return of(userToUpdate);
-  }
-
-  deleteUser(id: number): Observable<boolean>{ 
-     this.http.delete(this.baseUrl+ "/" + id).subscribe({
-      next: () => {
-        console.log('User deleted successfully from server');
-      },
-      error: (err) => {
-        console.error('Error deleting User from server:', err);
-      }
-    })
-    return of(true);
-  }
-
-  getRoles(): Observable<Role[]>{
-
-    return this.http.get<Role[]>(this.baseUrlRoles).pipe( 
-      catchError(err => {
-        console.error('Error fetching roles:', err);
-        return of([]); 
-      })
-    );
-  }
-
-  getRoleByName(name: string): Observable<Role|undefined > {
-    return this.http.get<Role>(`${this.baseUrlRoles}/name/${name}`).pipe(
-      map(role => {
-        console.log(role)
-        return role
-      })
-    );
-  }
-  
-  
-  getRoleHeaders(){
-    return rolesHeaders; 
-  }
-
-
-  createRoles(newRole: Role): Observable<Role>{
-    const roleWithId: Role = { 
-        ...newRole, 
-        createdAt: new Date().toISOString(), 
-        updatedAt: new Date().toISOString() 
-    };
-
-    this.http.post<Role>(this.baseUrlRoles, roleWithId).subscribe({
-      next: (response) => {
-        console.log('Role created and added to array:', response)
-        this.loadGridData(this.subSectionSignal())
-      },
-      error: (err) => {
-        console.error('Error creating rol:', err)
-        alert("Error creating user: It Aready Exists");
-      }
-    })
-    this.mockRoles.push(roleWithId);
-    console.log('Created role (mock):', roleWithId);
-    return of(roleWithId);
-  }
-
-  updateRole(roleToUpdate: Role): Observable<Role | undefined>{
-    console.log('Updating role:', roleToUpdate);
-   this.http.put<Role>(this.baseUrlRoles + "/" + roleToUpdate.id, roleToUpdate).subscribe({
-    next: (res) => {
-      console.log('Role updated and added to array:', res)
-      this.loadGridData(this.subSectionSignal())
-    }
-   })
-
-   return of(roleToUpdate);
-  }
-
-  deleteRole(id: number): Observable<boolean>{ 
-
-    this.http.delete(this.baseUrlRoles+ "/" + id).subscribe({
-      next: () => {
-        console.log('Role deleted successfully from server');
-      },
-      error: (err) => {
-        console.error('Error deleting role from server:', err);
-      }
-    })
-    return of(true);
-  }
-
-
-  getMenus(): Observable<Menu[]>{
-
-   return this.http.get<Menu[]>(this.baseUrlMenus).pipe(
-     catchError(err => {
-       console.error('Error fetching menus:', err);
-       return of([]); 
-     })
-   );
- }
-
-
- createMenu(menu: Menu){
-  this.http.post<Menu>(this.baseUrlMenus,menu).subscribe({
-    next: (res) => {
-      console.log('Menu created:', res)
-      this.loadGridData(this.subSectionSignal())
-    }
-  })
- }
- deleteMenu(id: number){
-  this.http.delete(this.baseUrlMenus+ "/" + id).subscribe({
-    next: () => {
-      console.log('Menu deleted successfully from server');
-    },
-    error: (err) => {
-      console.error('Error deleting Menu from server:', err);
-    }
-  })
-  return of(true);
- }
- updateMenu(updatedToUpdate : Menu){
-  console.log('Updating role:', updatedToUpdate);
-  this.http.put<Role>(this.baseUrlMenus + "/" + updatedToUpdate.id, updatedToUpdate).subscribe({
-   next: (res) => {
-     console.log('Role updated and added to array:', res)
-     this.loadGridData(this.subSectionSignal())
-   }
-  })
-
-  return of(updatedToUpdate);
- }
-
- getMenuRoles(): Observable<MenuRole[]>{
-
- return this.http.get<MenuRole[]>(this.baseUrlMenus+"/"+"menu-roles").pipe( 
-   catchError(err => {
-     console.error('Error fetching menuRoles:', err);
-     return of([]); 
-   })
- );
-}
-
-updateMenuRoles(id: number, roles: string[]): Observable<MenuRole[]> {
-  const rolesArray = Array.isArray(roles) ? roles : [roles]; 
-  const payload = { roles: rolesArray }; 
-
-  return this.http.put<MenuRole[]>(`${this.baseUrlMenus}/menu-roles/${id}`, payload).pipe(
-    catchError(err => {
-      console.error(`Error updating the menu of id: ${id}`, err);
-      return of([]);
-    })
-  );
-}
-
-
-
-
-
-
-
-
-
-
-
 
 
 }

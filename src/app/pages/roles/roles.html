@@ -1,0 +1,77 @@
+<div class="info-container p-4 md:p-8 bg-white min-h-screen">
+    
+
+
+    <div class="shadow-lg rounded-lg overflow-hidden">
+    <dx-data-grid
+        [dataSource]="dataSource()" 
+        [columns]="columnConfigurations()"
+        [showBorders]="false"
+        [hoverStateEnabled]="true"
+        [rowAlternationEnabled]="true"
+        (onRowUpdating)="onRowUpdating($event)" 
+        (onRowRemoving)="onRowRemoving($event)"
+        (onRowInserting)="onRowInserting($event)"
+        (onCellPrepared)="onCellPrepared($event)"
+        (onEditorPreparing)="onEditorPreparing($event)"
+        [keyExpr]="gridKeyField()"  
+        class="w-full  "
+    >
+    
+        <dxo-paging [pageSize]="10"></dxo-paging>
+        <dxo-pager
+            [showPageSizeSelector]="true"
+            [allowedPageSizes]="[5, 10, 20]"
+            [showInfo]="true">
+        </dxo-pager>
+        <dxo-editing 
+            mode="popup" 
+            [allowUpdating]="true" 
+            [allowDeleting]="true"
+            [allowAdding]="true"
+            [useIcons]="true">
+            <dxo-popup 
+                title="Handle Data"
+                [showTitle]="true"
+                [width]="700"
+                [height]="'auto'">
+            </dxo-popup>
+            <dxo-form
+            >
+               
+                @for (column of columnConfigurations(); track column.dataField ){
+                    
+                    <!-- @if (column.dataField === 'id' || column.dataField === 'updatedAt'){
+                        <div></div>
+                    } -->
+                    @if (column.dataField == 'roleName'){
+                        <dxi-item 
+                        dataField="roleName" 
+                        editorType="dxSelectBox"
+                        [editorOptions]="{
+                            dataSource: rolesAvailables(), 
+                            valueExpr: 'roleName', 
+                            displayExpr: 'roleName', 
+                            placeholder: 'Select a Role',
+                            searchEnabled: true
+                        }">
+                        <dxo-label [text]="column.caption || 'Role Name'"></dxo-label> 
+                    </dxi-item>
+            
+                    }
+                    
+                    @else if (column.dataField != 'ID' || column.dataField != 'updatedAt' ) {
+                        <dxi-item 
+                            [dataField]="column.dataField"
+                            [editorOptions]="column.editorOptions">
+                        </dxi-item>
+                    }
+                }
+            </dxo-form>
+        </dxo-editing>
+       
+    </dx-data-grid>
+</div>
+
+
+</div>
