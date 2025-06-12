@@ -1,10 +1,11 @@
 <div class="info-container p-4 md:p-8 bg-white min-h-screen">
     
-    <div class="shadow-lg rounded-lg overflow-hidden">
+    <div class=" rounded-lg overflow-hidden">
     <dx-data-grid
         [dataSource]="dataSource()" 
         [columns]="columnConfigurations()"
         [showBorders]="false"
+        [showColumnLines]="false"
         [hoverStateEnabled]="true"
         [rowAlternationEnabled]="true"
         (onRowUpdating)="onRowUpdating($event)" 

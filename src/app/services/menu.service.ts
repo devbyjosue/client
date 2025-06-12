@@ -2,13 +2,13 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
-import { Menu, MenuRole } from '../../types'; // Assuming 'Menu' and 'MenuRole' types are in '../../types'
+import { Menu, MenuRole } from '../../types';
 
 @Injectable({
   providedIn: 'root'
 })
 export class MenuService {
-  private baseUrlMenus = 'http://localhost:5178/api/menus'; // Copied from info.ts
+  private baseUrlMenus = 'http://localhost:5178/api/menus'; 
 
   constructor(private http: HttpClient) { }
 
@@ -25,7 +25,7 @@ export class MenuService {
     return this.http.post<Menu>(this.baseUrlMenus, menu).pipe(
       catchError(err => {
         console.error('Error creating menu:', err);
-        return of(err); // Or handle error appropriately
+        return of(err);
       })
     );
   }
@@ -45,12 +45,12 @@ export class MenuService {
     return this.http.put<Menu>(this.baseUrlMenus + "/" + menuToUpdate.id, menuToUpdate).pipe(
       catchError(err => {
         console.error('Error updating menu:', err);
-        return of(undefined); // Or handle error appropriately
+        return of(undefined); 
       })
     );
   }
 
-  getMenuRoles(): Observable<MenuRole[]>{
+  getMenuRoles(): Observable<any[]>{
     return this.http.get<MenuRole[]>(this.baseUrlMenus+"/"+"menu-roles").pipe( 
       catchError(err => {
         console.error('Error fetching menuRoles:', err);
@@ -59,15 +59,20 @@ export class MenuService {
     );
   }
 
-  updateMenuRoles(id: number, roles: string[]): Observable<MenuRole[]> {
-    const rolesArray = Array.isArray(roles) ? roles : [roles]; 
-    const payload = { roles: rolesArray }; 
+  createMenuRoles(){
 
-    return this.http.put<MenuRole[]>(`${this.baseUrlMenus}/menu-roles/${id}`, payload).pipe(
+  }
+
+
+
+  updateMenuRoles(id: number, updatedMenu: { id: Number, canView: Boolean, canEdit: Boolean}): Observable<MenuRole[]> {
+
+    return this.http.put<MenuRole[]>(`${this.baseUrlMenus}/menu-roles/${id}`, updatedMenu).pipe(
       catchError(err => {
         console.error(`Error updating the menu of id: ${id}`, err);
         return of([]);
       })
     );
+    
   }
 }

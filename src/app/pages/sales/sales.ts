@@ -23,7 +23,7 @@ export class Sales {
   sectionSignal = signal("" as string | null);
   subSectionSignal = signal("" as string | null); 
   formSignal = signal(false);
-  gridKeyField = signal<string>("id");
+  gridKeyField = signal<string>("salesOrderId");
 
   dataSource = signal<any[]>([]); 
   columnConfigurations = signal<any[]>([]);
@@ -44,13 +44,7 @@ export class Sales {
       this.sectionSignal.set(section);
       this.subSectionSignal.set(subSection);
 
-      if (subSection === 'sales') {
-        this.gridKeyField.set('salesOrderId');
-      } else if (subSection === 'users' || subSection === 'roles') {
-        this.gridKeyField.set('id');
-      } else {
-        this.gridKeyField.set('id');
-      }
+ 
 
 
 

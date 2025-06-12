@@ -10,35 +10,26 @@ import { CommonModule } from '@angular/common';
   templateUrl: './header.html',
   styleUrl: './header.css'
 })
-export class Header implements OnInit{
+export class Header implements OnInit {
 
   headerTitle = signal("" as string | null);
   
   constructor(private route: ActivatedRoute, private router: Router) {}
 
   ngOnInit(): void {
-  this.router.events
- .pipe(filter(event => event instanceof NavigationEnd))
- .subscribe(() => {
- let currentRoute = this.route.root;
- while (currentRoute.firstChild) {
- currentRoute = currentRoute.firstChild;
- }
-      currentRoute.paramMap.subscribe(params => {
-          const section = params.get('section');
-          const subSection = params.get('subSection');
-          const concat = capitalize(section) + " " + capitalize(subSection);
-          this.headerTitle.set(concat);
-});
- });
- }
+    this.router.events
+      .pipe(filter(event => event instanceof NavigationEnd))
+      .subscribe(() => {
+        const currentUrl = this.router.url;
+        const urlSegments = currentUrl.split('/');
+        const lastSegment = urlSegments[urlSegments.length - 1];
+        this.headerTitle.set(capitalize(lastSegment));
+    });
+  }
 
-
- navigateTo(route: string): void {
-  console.log("Navigating to:", route);
-  this.router.navigate([route], { relativeTo: this.route });
-  // this.headerTitle.set(null);
-  // window.scrollTo(0, 0);
-
- }
+  navigateTo(route: string): void {
+    console.log("Navigating to:", route);
+    this.router.navigate([route], { relativeTo: this.route });
+  
+  }
 }

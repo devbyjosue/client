@@ -75,7 +75,7 @@ export class Info implements OnInit {
     if (!subSection) return;
 
     if (subSection === "users") {
-        this.userService.getUsers().subscribe(users => { // Use userService
+        this.userService.getUsers().subscribe(users => { 
           this.dataSource.set(users);
           this.columnConfigurations.set(
             [
@@ -90,7 +90,7 @@ export class Info implements OnInit {
           )
         });
     } else if (subSection === "roles") {
-      this.roleService.getRoles().subscribe(roles => { // Use roleService
+      this.roleService.getRoles().subscribe(roles => { 
           this.dataSource.set(roles);
           this.columnConfigurations.set(
             [
@@ -103,7 +103,7 @@ export class Info implements OnInit {
           )
         });
     }else if (subSection === "sales") {
-    this.salesService.getSalesOrdersHeaders().subscribe(salesOrders => { // Use salesService
+    this.salesService.getSalesOrdersHeaders().subscribe(salesOrders => { 
         console.log("Sales Orders:", salesOrders);
         this.dataSource.set(salesOrders);
         this.columnConfigurations.set(
@@ -130,7 +130,7 @@ export class Info implements OnInit {
     
     }
     if (subSection === "menus"){
-      this.menuService.getMenus().subscribe(menus => { // Use menuService
+      this.menuService.getMenus().subscribe(menus => { 
         console.log("Menus:", menus);
           this.dataSource.set(menus);
           this.columnConfigurations.set(
@@ -145,7 +145,7 @@ export class Info implements OnInit {
         });
     }
     if (subSection === "menu-roles"){
-      this.menuService.getMenuRoles().subscribe(menuRoles => { // Use menuService
+      this.menuService.getMenuRoles().subscribe(menuRoles => { 
         console.log("MenuRoles:", menuRoles);
           this.dataSource.set(menuRoles);
           this.columnConfigurations.set(
@@ -207,10 +207,8 @@ export class Info implements OnInit {
         updatedAt: new Date().toISOString()
       };
 
-      // Get role name from either new or old data
       const roleName = e.newData.roleName ?? e.oldData.roleName;
 
-      // First get the roleId by searching for the role name
       this.roleService.getRoleByName(roleName).subscribe({
         next: (role) => {
           if (!role) {
@@ -223,7 +221,7 @@ export class Info implements OnInit {
             roleId: role.id
           };
 
-          this.userService.updateUser(updatedUser).subscribe({ // Use userService
+          this.userService.updateUser(updatedUser).subscribe({ 
             next: (response) => {
               console.log('User updated successfully');
               this.loadGridData(this.subSectionSignal());

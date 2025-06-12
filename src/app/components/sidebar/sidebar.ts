@@ -47,7 +47,7 @@ export class Sidebar {
       subLinks : [
         {
           name: "Sales",
-          link: "/admin/sales/table"
+          link: "/admin/sales"
         }
       ]
     }

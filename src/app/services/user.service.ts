@@ -19,7 +19,6 @@ export class UserService {
   constructor(private http: HttpClient) { }
 
   getUsers(): Observable<user[]>{
-    console.log("getting users");
     return this.http.get<user[]>(this.baseUrl).pipe( 
       catchError(err => {
         console.error('Error fetching users:', err);
@@ -29,8 +28,16 @@ export class UserService {
   }
 
   getUserById(id: number): Observable<user | undefined>{
-    const user = this.mockUsers.find(u => u.id === id);
-    return of(user);
+    // const user = this.mockUsers.find(u => u.id === id);
+    return of();
+  }
+  getUserByName(name: string): Observable<user>{
+    return this.http.get<user>(this.baseUrl + "/name/"+ name).pipe( 
+      catchError(err => {
+        console.error('Error fetching users:', err);
+        return of(); 
+      })
+    );
   }
 
   createUser(newUser: user | any): Observable<user>{

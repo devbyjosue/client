@@ -68,8 +68,8 @@ export class Roles {
           [
           { dataField: 'id', caption: 'ID', visible: false },
           { dataField: 'name', caption: 'Name' },
-          { dataField: 'createdAt', caption: 'Created At', dataType: 'datetime' },
-          { dataField: 'updatedAt', caption: 'Updated At', dataType: 'datetime' },
+          { dataField: 'createdAt', caption: 'Created At', dataType: 'datetime', editorOptions: { value: new Date(), readOnly: true } },
+          { dataField: 'updatedAt', caption: 'Updated At', dataType: 'datetime', editorOptions: { value: new Date(), readOnly: true } },
           { type: 'buttons', buttons: ['edit', 'delete'] }
         ]
         )

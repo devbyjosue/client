@@ -33,7 +33,6 @@ export class Users implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    private router: Router,
     private userService: UserService, 
     private roleService: RoleService
     ) {
@@ -57,9 +56,16 @@ export class Users implements OnInit {
       }
 
 
+      this.roleService.getRoles().subscribe(roles => {
+        const rolesName = roles.map(role => role.name)
+        this.rolesAvailables.set(rolesName)
+        console.log("roleees",rolesName)
+      })
 
       this.loadGridData();
     });
+
+    
     
   }
 
@@ -80,12 +86,15 @@ export class Users implements OnInit {
       )
     }); 
     
+    
 
   }
 
   capitalize = capitalize;
 
   onEditorPreparing(e:any) {
+
+    
     if (e.dataField === "id" || e.dataField === "updatedAt") {
       e.editorOptions.visible = false;
       e.editorOptions.label = { visible: false };
@@ -155,7 +164,6 @@ export class Users implements OnInit {
 
   onRowRemoving(e: any) {
     console.log('Row removing:', e.data); 
-    const currentSubSection = this.subSectionSignal();
     const idToDelete = e.data.id; 
 
     if (!idToDelete) {
@@ -164,22 +172,20 @@ export class Users implements OnInit {
         return;
     }
 
-    if (currentSubSection === "users"){
-        this.userService.deleteUser(idToDelete).subscribe(success => { 
-            if (success) {
-                console.log('User deleted successfully');
-                 this.loadGridData(); 
-            } else {
-                console.error('Failed to delete user');
-            }
-        });
-    } 
+    this.userService.deleteUser(idToDelete).subscribe(success => { 
+        if (success) {
+            console.log('User deleted successfully');
+             this.loadGridData(); 
+        } else {
+            console.error('Failed to delete user');
+        }
+    });
+   
    
   }
 
   onRowInserting(entry: any){
     console.log("Form submitted with entry:", entry);
-    const currentSubSection = this.subSectionSignal();
 
     this.roleService.getRoleByName(entry.data.roleName).subscribe(role => {
       if (!role){
