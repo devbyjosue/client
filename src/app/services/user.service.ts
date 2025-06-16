@@ -2,13 +2,14 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
-import { user } from '../../types'; // Assuming 'user' type is in '../../types'
+import { user } from '../../types'; 
+import notify from 'devextreme/ui/notify';
 
 @Injectable({
   providedIn: 'root'
 })
 export class UserService {
-  private baseUrl = 'http://localhost:5178/api/users'; // Copied from info.ts
+  private baseUrl = 'http://localhost:5178/api/users'; 
   private mockUsers: user[] = [
     { id: 1, name: 'Alice Wonderland', voucher: 'VOUCHER001', roleName: "user", createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
     { id: 2, name: 'Bob The Builder', voucher: 'VOUCHER002', roleName: "user", createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
@@ -28,7 +29,6 @@ export class UserService {
   }
 
   getUserById(id: number): Observable<user | undefined>{
-    // const user = this.mockUsers.find(u => u.id === id);
     return of();
   }
   getUserByName(name: string): Observable<user>{
@@ -49,8 +49,8 @@ export class UserService {
 
     return this.http.post<user>(this.baseUrl, userWithId).pipe(
       catchError(err => {
-        alert("Error creating user: It Already Exists");
-        throw err; // Re-throw the error to be caught by the subscriber if needed
+        notify("User Already Exists", "error", 3000)
+        throw err; 
       })
     );
   }
@@ -66,10 +66,10 @@ export class UserService {
 
   deleteUser(id: number): Observable<boolean>{ 
     return this.http.delete<boolean>(`${this.baseUrl}/${id}`).pipe(
-      map(() => true), // If delete is successful, map to true
+      map(() => true), 
       catchError(err => {
         console.error('Error deleting User from server:', err);
-        return of(false); // On error, return an observable of false
+        return of(false); 
       })
     );
   }

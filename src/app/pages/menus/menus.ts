@@ -6,6 +6,7 @@ import { capitalize } from '../../../utils/capitalize';
 import { MenuService } from '../../services/menu.service';
 import { ActivatedRoute } from '@angular/router';
 import { Menu } from 'src/types';
+import notify from 'devextreme/ui/notify';
 
 @Component({
   selector: 'app-menus',
@@ -110,9 +111,9 @@ export class Menus {
     
     const idToUpdate = e.key; 
      if (!idToUpdate) {
-        console.error('Cannot update item without ID');
-        e.cancel = true; 
-        return;
+       console.error('Cannot update item without ID');
+       e.cancel = true; 
+       return;
     }
 
     const updatedMenu: Menu = {
@@ -123,9 +124,12 @@ export class Menus {
     }
     this.menuService.updateMenu(updatedMenu).subscribe(updatedMenuResponse => {
       if (updatedMenuResponse) {
+        notify("Updated Sucessfully", "success", 3000)
           console.log('Menu updated successfully');
           this.loadGridData();
       } else {
+        notify("Error Updating", "error", 3000)
+
           console.error('Failed to update menu');
           e.cancel = true;
       }
@@ -145,9 +149,11 @@ export class Menus {
 
     this.menuService.deleteMenu(idToDelete).subscribe(success => { 
       if (success) {
+        notify("Delete Sucessfully", "success", 3000)
           console.log('Menu deleted successfully');
           this.loadGridData(); 
       } else {
+        notify("Error Deleting", "error", 3000)
           console.error('Failed to delete menu');
       }
   }); 
@@ -156,7 +162,6 @@ export class Menus {
 
   onRowInserting(entry: any){
     console.log("Form submitted with entry:", entry);
-    const currentSubSection = this.subSectionSignal();
 
   
        
@@ -167,10 +172,12 @@ export class Menus {
     }
     this.menuService.createMenu(newMenu).subscribe(createdMenu => { 
       if (createdMenu) {
+        notify("Created Sucessfully", "success", 3000)
         console.log('Menu created successfully:', createdMenu);
         this.loadGridData();
         this.closeTheForm();
       } else {
+        notify("Error creating Menu", "success", 3000)
         console.error('Failed to create menu');
       }
     });

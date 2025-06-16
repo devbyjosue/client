@@ -5,6 +5,7 @@ import { capitalize } from '../../../utils/capitalize';
 import { MenuService } from '../../services/menu.service'; 
 import { ActivatedRoute } from '@angular/router';
 import { RoleService } from 'src/app/services/role.service';
+import notify from 'devextreme/ui/notify';
 
 
 
@@ -46,7 +47,6 @@ export class MenuRoles {
     this.roleService.getRoles().subscribe(roles => {
       const rolesName = roles.map(role => role.name)
       this.rolesAvailables.set(rolesName)
-      // console.log("roleees",rolesName)
       this.loadGridData();
     })
 
@@ -62,37 +62,14 @@ loadGridData(): void {
     console.log(menuRoles)
 
     const currentSelectedMenuData = menuRoles.filter(m => m.roleName == this.selectedRole())
-    const notCurrentSelectedMenuData = menuRoles.filter(m => m.roleName != this.selectedRole())
 
     console.log(currentSelectedMenuData)
-    console.log(notCurrentSelectedMenuData)
     
   
     const allMenus = [
       ...currentSelectedMenuData,
-      ...notCurrentSelectedMenuData.map(menu => ({
-        ...menu,
-        canView: false,
-        canEdit: false
-      }))
     ];
-    
-    
-    // const menusWithRole = menuRoles.filter(m => m.roles.includes(this.selectedRole()));
-
-    // console.log(menusWithRole)
-
-    // const menusWithoutRole = menuRoles.filter(m => !m.roles.includes(this.selectedRole()));
-    // const allMenus = [
-    //   ...menusWithRole,
-    //   ...menusWithoutRole.map(menu => ({
-    //     ...menu,
-    //     canView: false,
-    //     canEdit: false
-    //   }))
-    // ];
-    
-    // console.log(allMenus)
+   
     
     this.dataSource.set(allMenus);
     this.columnConfigurations.set([
@@ -150,9 +127,11 @@ onRowUpdating(e: any) {
     this.menuService.updateMenuRoles(e.key, updatedMenuRole).subscribe(menuRole => { 
         console.log(menuRole)
         if (menuRole && menuRole.length > 0) { 
+            notify("Updated Sucessfully", "success", 3000)
             console.log('MenuRole updated successfully')
             this.loadGridData();
         } else {
+          notify("Error updating", "error", 3000)
             console.error('Failed to update MenuRole or no roles returned')
             e.cancel = true;
         }
@@ -201,12 +180,6 @@ onRowUpdating(e: any) {
   }
 
   saveChanges() {
-    // const changes = this.dataSource().filter(item => item.view !== item.originalView || item.edit !== item.originalEdit);
-    // changes.forEach(change => {
-    //   this.menuService.updateMenuRoles(change.id, { view: change.view, edit: change.edit }).subscribe({
-    //     next: () => console.log(`Changes saved for menu role ID: ${change.id}`),
-    //     error: err => console.error(`Failed to save changes for menu role ID: ${change.id}`, err)
-    //   });
-    // });
+ 
   }
 }

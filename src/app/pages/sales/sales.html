@@ -8,14 +8,41 @@
         [showColumnLines]="false"
         [hoverStateEnabled]="true"
         [rowAlternationEnabled]="true"
+        (onRowClick)="onRowClick($event)"
         (onRowUpdating)="onRowUpdating($event)" 
-        (onRowRemoving)="onRowRemoving($event)"
         (onRowInserting)="onRowInserting($event)"
+        (onRowRemoving)="onRowRemoving($event)"
         (onCellPrepared)="onCellPrepared($event)"
         (onEditorPreparing)="onEditorPreparing($event)"
         [keyExpr]="gridKeyField()"  
-        class="w-full  "
+        class="w-full"
     >
+        <dxo-master-detail
+            [enabled]="true"
+            template="detailGridTemplate"
+        ></dxo-master-detail>
+
+        <div *dxTemplate="let salesOrder of 'detailGridTemplate'">
+            <dx-data-grid
+                [dataSource]="getDetailGridDataSource()"
+                [columns]="detailColumnConfigurations()"                
+                (onCellPrepared)="onCellPrepared($event)"
+                (onRowInserting)="onRowInserting($event)"
+                [showBorders]="false"
+                [showColumnLines]="false"
+                [hoverStateEnabled]="true"
+                [rowAlternationEnabled]="true"
+                [keyExpr]="'salesOrderDetailId'"
+            >
+                <dxo-paging [pageSize]="5"></dxo-paging>
+                <dxo-pager
+                    [showPageSizeSelector]="true"
+                    [allowedPageSizes]="[5, 10, 20]"
+                    [showInfo]="true">
+                </dxo-pager>
+            </dx-data-grid>
+        </div>
+  
     
         <dxo-paging [pageSize]="10"></dxo-paging>
         <dxo-pager
@@ -25,46 +52,76 @@
         </dxo-pager>
         <dxo-editing 
             mode="popup" 
-            [allowUpdating]="true" 
             [allowDeleting]="true"
             [allowAdding]="true"
             [useIcons]="true">
             <dxo-popup 
-                title="Handle Data"
                 [showTitle]="true"
                 [width]="700"
                 [height]="'auto'">
             </dxo-popup>
+
             <dxo-form
-            >
-               
-                @for (column of columnConfigurations(); track column.dataField ){
-                    
-  
-                    @if (column.dataField == 'roleName'){
-                        <dxi-item 
-                        dataField="roleName" 
+                >
+                   
+                    <dxi-item 
+                        [dataField]="'Customer'"
                         editorType="dxSelectBox"
                         [editorOptions]="{
-                            dataSource: rolesAvailables(), 
-                            valueExpr: 'roleName', 
-                            displayExpr: 'roleName', 
-                            placeholder: 'Select a Role',
+                            dataSource: customersAvailable(),
+                            placeholder: 'Select a Customer',
                             searchEnabled: true
-                        }">
-                        <dxo-label [text]="column.caption || 'Role Name'"></dxo-label> 
+                        }"
+                        >
                     </dxi-item>
-            
-                    }
+
+                    <!-- <dxi-item>
+                    </dxi-item> -->
                     
-                    @else if (column.dataField != 'ID' || column.dataField != 'updatedAt' ) {
-                        <dxi-item 
-                            [dataField]="column.dataField"
-                            [editorOptions]="column.editorOptions">
-                        </dxi-item>
-                    }
-                }
-            </dxo-form>
+                    <!-- <dxi-item 
+                    dataField="Product" 
+                    editorType="dxSelectBox"
+                    [editorOptions]="{
+                        dataSource: productsAvailable(), 
+                        placeholder: 'Select a product',
+                        searchEnabled: true
+                            }"
+                        >
+                
+                     </dxi-item>
+                    <dxi-item 
+                    [dataField]="'Quantity'"
+                    [validationRules]="[{ type: 'numeric' }]"
+                
+                    >
+                </dxi-item> -->
+
+                <dxi-item>
+                    <dx-button icon="add" (onClick)="addProduct()"></dx-button>
+                </dxi-item>
+                  
+                <ng-container *ngFor="let i of productsCounter(); let idx = index">
+                    <dxi-item 
+                        dataField="Product" 
+                        editorType="dxSelectBox"
+                        [editorOptions]="{
+                            dataSource: productsAvailable(), 
+                            placeholder: 'Select a product',
+                            searchEnabled: true
+                        }"
+                    >
+                    </dxi-item>
+                    <dxi-item 
+                        [dataField]="'Quantity'"
+                        [validationRules]="[{ type: 'numeric' }]"
+                    >
+                    </dxi-item>
+                </ng-container>
+
+
+
+                </dxo-form>
+          
         </dxo-editing>
        
     </dx-data-grid>

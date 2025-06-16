@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { Role } from '../../types'; // Assuming 'Role' type is in '../../types'
+import notify from 'devextreme/ui/notify';
 
 @Injectable({
   providedIn: 'root'
@@ -46,7 +47,7 @@ export class RoleService {
     return this.http.post<Role>(this.baseUrlRoles, roleWithId).pipe(
       catchError(err => {
         console.error('Error creating role:', err);
-        alert("Error creating role: It Already Exists");
+        notify("Role Already Exists", "error", 3000)
         return of(err); // Or handle error appropriately
       })
     );

@@ -5,6 +5,7 @@ import { UserService } from 'src/app/services/user.service';
 import { capitalize } from 'src/utils/capitalize';
 import { DxDataGridModule, DxButtonModule, DxSelectBoxModule , DxFormModule, DxTextBoxModule } from 'devextreme-angular';
 import { CommonModule } from '@angular/common';
+import notify from 'devextreme/ui/notify';
 
 
 @Component({
@@ -148,10 +149,12 @@ export class Users implements OnInit {
 
         this.userService.updateUser(updatedUser).subscribe({ 
           next: (response) => {
+            notify("Updated Sucessfully", "success", 3000)
             console.log('User updated successfully');
             this.loadGridData();
           },
           error: (error) => {
+            notify("Deleted Sucessfully", "error", 3000)
             console.error('Failed to update user:', error);
           }
         });
@@ -174,6 +177,7 @@ export class Users implements OnInit {
 
     this.userService.deleteUser(idToDelete).subscribe(success => { 
         if (success) {
+            notify("Deleted Sucessfully", "success", 3000)
             console.log('User deleted successfully');
              this.loadGridData(); 
         } else {
@@ -189,7 +193,6 @@ export class Users implements OnInit {
 
     this.roleService.getRoleByName(entry.data.roleName).subscribe(role => {
       if (!role){
-        alert("Unable to create User, not a valid role")
         return 
       }
       const newUser = {
@@ -203,6 +206,7 @@ export class Users implements OnInit {
       console.log(newUser)
       this.userService.createUser(newUser).subscribe({
         next: (createdUser) => {
+          notify("Created Sucessfully", "success", 3000)
           console.log('User created successfully:', createdUser);
           this.loadGridData();
           this.closeTheForm();

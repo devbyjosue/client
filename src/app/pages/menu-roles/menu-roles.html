@@ -27,6 +27,7 @@
         class="w-full"
     >
     
+    
         <dxo-paging [pageSize]="10"></dxo-paging>
         <dxo-pager
             [showPageSizeSelector]="true"
@@ -51,19 +52,6 @@
             </dxo-popup>
             <dxo-form
             >
-               
-                <!-- @for (column of columnConfigurations(); track column.dataField ){
-                    
-                    <dxi-item 
-                    [dataField]="column.dataField"
-                    editorType="dxCheckBox"
-                    [editorOptions]="column.editorOptions"
-                    ></dxi-item>
-                    
-                    
-                  
-                } -->
-            
                 <dxi-item 
                     [dataField]="'name'"
                     >

@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { DxDataGridModule, DxButtonModule, DxSelectBoxModule , DxFormModule, DxTextBoxModule } from 'devextreme-angular';
+import notify from 'devextreme/ui/notify';
 import { RoleService } from 'src/app/services/role.service';
 import { Role } from 'src/types';
 import { capitalize } from 'src/utils/capitalize';
@@ -119,9 +120,11 @@ export class Roles {
     }
       this.roleService.updateRole(updatedRole).subscribe(updatedRoleResponse => { 
           if (updatedRoleResponse) {
+            notify("Updated Sucessfully", "success", 3000)
               console.log('Role updated successfully');
               this.loadGridData();
           } else {
+            notify("Error updating role", "error", 3000)
               console.error('Failed to update role');
               e.cancel = true;
           }
@@ -141,9 +144,11 @@ export class Roles {
 
     this.roleService.deleteRole(idToDelete).subscribe(success => { 
         if (success) {
+          notify("Role deleted sucessfully", "success", 3000)
             console.log('Role deleted successfully');
             this.loadGridData(); 
         } else {
+          notify("Error deleting role", "success", 3000)
             console.error('Failed to delete role');
             e.cancel = true;
         }
@@ -163,10 +168,12 @@ export class Roles {
     
       this.roleService.createRole(newRole).subscribe(createdRole => { 
         if (createdRole) {
+          notify("Created Sucessfully", "success", 3000)
           console.log('Role created successfully:', createdRole);
           this.loadGridData();
           this.closeTheForm();
         } else {
+          notify("Error creating role", "success", 3000)
           console.error('Failed to create role');
         }
       });
