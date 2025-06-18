@@ -32,7 +32,7 @@
                 [showColumnLines]="false"
                 [hoverStateEnabled]="true"
                 [rowAlternationEnabled]="true"
-                [keyExpr]="'salesOrderDetailId'"
+                [keyExpr]="'salesOrderDetailID'"
             >
                 <dxo-paging [pageSize]="5"></dxo-paging>
                 <dxo-pager
@@ -57,52 +57,69 @@
             [useIcons]="true">
             <dxo-popup 
                 [showTitle]="true"
-                [width]="700"
+                [onHidden]="onFormClosed"
+                [width]="1280"
                 [height]="'auto'">
             </dxo-popup>
 
-            <dxo-form
-                >
-                   
-                    <dxi-item 
-                        [dataField]="'Customer'"
-                        editorType="dxSelectBox"
-                        [editorOptions]="{
-                            dataSource: customersAvailable(),
-                            placeholder: 'Select a Customer',
-                            searchEnabled: true
-                        }"
-                        >
-                    </dxi-item>
 
-                    <!-- <dxi-item>
-                    </dxi-item> -->
-                    
-                    <!-- <dxi-item 
-                    dataField="Product" 
+        
+
+            <dxo-form
+            [colCount]="3"
+            (onFieldDataChanged)="handleFieldChange($event)"
+            >
+                   
+                <dxi-item 
+                    [dataField]="'Customer'"
                     editorType="dxSelectBox"
                     [editorOptions]="{
-                        dataSource: productsAvailable(), 
-                        placeholder: 'Select a product',
+                        dataSource: customersAvailable(),
+                        placeholder: 'Select a Customer',
                         searchEnabled: true
-                            }"
-                        >
-                
-                     </dxi-item>
-                    <dxi-item 
-                    [dataField]="'Quantity'"
-                    [validationRules]="[{ type: 'numeric' }]"
-                
-                    >
-                </dxi-item> -->
-
-                <dxi-item>
-                    <dx-button icon="add" (onClick)="addProduct()"></dx-button>
+                    }"
+                >
                 </dxi-item>
-                  
-                <ng-container *ngFor="let i of productsCounter(); let idx = index">
+
+                <dxi-item
+                    [dataField]="'salesOrderNumber'"
+                >
+
+                </dxi-item>
+                
+                <dxi-item
+                    [dataField]="'purchaseOrderNumber'"
+                >
+
+                </dxi-item>
+                
+                
+                <dxi-item
+                    [dataField]="'accountNumber'"
+                >
+                </dxi-item>
+
+                <dxi-item
+                    [dataField]="'comment'"
+                >
+                </dxi-item>
+                <dxi-item 
+                    itemType="button"
+                    [buttonOptions]="buttonOptions()">
+                    
+                </dxi-item>
+                
+                <dxi-item></dxi-item>
+                
+                <dxi-item></dxi-item>
+                <dxi-item></dxi-item>
+
+                
+        
+                    
+                @for(product of productsArray(); track product){
                     <dxi-item 
-                        dataField="Product" 
+                        [dataField]="'Product' + productsArray().indexOf(product)" 
                         editorType="dxSelectBox"
                         [editorOptions]="{
                             dataSource: productsAvailable(), 
@@ -112,20 +129,25 @@
                     >
                     </dxi-item>
                     <dxi-item 
-                        [dataField]="'Quantity'"
+                        [dataField]="'Quantity' + productsArray().indexOf(product)" 
                         [validationRules]="[{ type: 'numeric' }]"
+                        [editorOptions]="{
+                            dataSource: productsAvailable(), 
+                            placeholder: '1',
+                        }"
                     >
                     </dxi-item>
-                </ng-container>
+                    <dxi-item></dxi-item>
+                }
+                
+                 
 
-
-
-                </dxo-form>
-          
+                
+                
+            </dxo-form>
         </dxo-editing>
-       
+        
     </dx-data-grid>
 </div>
-
 
 </div>
