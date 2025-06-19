@@ -8,7 +8,7 @@ import { Menu, MenuRole } from '../../types';
   providedIn: 'root'
 })
 export class MenuService {
-  private baseUrlMenus = 'http://localhost:5178/api/menus'; 
+  private baseUrlMenus = 'https://localhost:7229/api/menus'; //https://localhost:44320/api/menus
 
   constructor(private http: HttpClient) { }
 

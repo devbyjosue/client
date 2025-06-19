@@ -1,7 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DxDataGridModule, DxButtonModule, DxSelectBoxModule , 
-  DxFormModule, DxTextBoxModule } from 'devextreme-angular';
+  DxFormModule, DxTextBoxModule, DxPopupModule } from 'devextreme-angular';
 import { ChangeDetectorRef } from '@angular/core';
 import { capitalize } from '../../../utils/capitalize';
 import notify from 'devextreme/ui/notify';
@@ -17,7 +17,7 @@ import { DxDataGridComponent } from 'devextreme-angular';
     CommonModule, 
     DxDataGridModule, DxButtonModule, 
     DxSelectBoxModule, DxFormModule,
-    DxTextBoxModule 
+    DxTextBoxModule, DxPopupModule
   ],
   templateUrl: './sales.html',
   styleUrl: './sales.css'
@@ -46,6 +46,14 @@ export class Sales {
   productsArray = signal<any[]>([{}])
   currentTotal = signal<number>(0);
   selectedProductValues = signal<any[]>([])
+
+
+  confirmationPopupVisible = signal(false);
+  confirmationDetails = signal<any[]>([]);
+  confirmationTotal = signal<number>(0);
+  pendingSaleEntry = signal<any>(null);
+
+  @ViewChild(DxDataGridComponent, { static: false }) dataGrid!: DxDataGridComponent;
 
 
   constructor(
@@ -234,78 +242,105 @@ export class Sales {
 
   onRowInserting(entry: any){
     console.log("Form submitted with entry:", entry);
+    entry.cancel = true;
+    const entryData = entry.data;
+
+    if (entryData.Customer === undefined || entryData.Customer === null || entryData.Customer === "") {
+      notify("Please select a customer", "error", 3000);
+      return;
+    }
+    if (entryData.salesOrderNumber === undefined || entryData.salesOrderNumber === null || entryData.salesOrderNumber === "") {
+      notify("Please enter a sales order number", "error", 3000);
+      return;
+    }
+    if (entryData.purchaseOrderNumber === undefined || entryData.purchaseOrderNumber === null || entryData.purchaseOrderNumber === "") {
+      notify("Please enter a purchase order number", "error", 3000);
+      return;
+    }
+    if (entryData.accountNumber === undefined || entryData.accountNumber === null || entryData.accountNumber === "") {
+      notify("Please enter an account number", "error", 3000);
+      return;
+    }
 
 
-    const productEntries = Object.entries(entry.data)
-      .reduce((acc: any[], [key, value]) => {
-        if (key.startsWith('Product') && value) {
-          const index = key.replace('Product', '');
-          const quantityKey = `Quantity${index}`;
-          const quantity = entry.data[quantityKey] ?? 1;
 
-       
-
-          
-          if (quantity) {
-            acc.push({
-              product: String(value).split(" - $")[0], 
-              quantity: quantity
-            });
-          }
-        }
-        return acc;
-      }, []);
-
-      console.log(productEntries)
-
-    const products = productEntries.map(pe => {
-      const myProduct = this.productsObjectAvailables().map( p => {
-        if(p.name == pe.product){
-          return p
-        }
-      }).filter(p => p != undefined)[0]
-
-      myProduct.quantity = parseInt(pe.quantity,10)
-      return myProduct
-    })
-    // console.log(products)
-
-
-    const customer = this.customersObjectAvailables().filter(c => c.name == entry.data.Customer)[0]
-    let sum = 0
-    products.map(p => p.quantity * p.standardCost).forEach(n => sum += n)
-    const subTotal = sum
-    // console.log(subTotal)
-    const taxAmt = 123
-
-
-    const SaleOrderDetails = products.map(p => {
+    
+    this.pendingSaleEntry.set(entryData);
+    const productsToConfirm = Object.entries(entryData)
+    .filter(([key, val]) => key.startsWith('Product') && val)
+    .map(([key, val]) => {
+      const index = key.replace('Product', '');
+      const quantity = entryData[`Quantity${index}`] || 1;
+      const productName = String(val).split(" - $")[0];
+      const product = this.productsObjectAvailables().find(p => p.name === productName);
       return {
-        salesOrderID: 75139,
-        CarrierTrackingNumber: "XYZ123456",
-        OrderQty: p.quantity,
-        ProductId: p.productID,
-        SpecialOfferId: 1,
-        UnitPrice: p.standardCost,
-        UnitPriceDiscount: 0.00,
-        LineTotal: 249.90,
-        ModifiedDate: new Date().toISOString(),
+        product: product.name,
+        quantity: parseInt(quantity, 10),
+        unitPrice: product.standardCost,
+        total: parseInt(quantity, 10) * product.standardCost,
+      };
+    });
+    const totalDue = productsToConfirm.reduce((sum, p) => sum + p.total, 0);
 
-      }
-    })
+    
+    if (productsToConfirm.length === 0) {
+      notify("Please select at least one product", "error", 3000);
+      this.productsArray().length = 1;
+      return;
+    }
+    productsToConfirm.length = this.productsArray().length; 
+    
+    this.confirmationDetails.set(productsToConfirm);
+    this.confirmationTotal.set(totalDue);
+    this.confirmationPopupVisible.set(true);
+
+    
+    // this.productsArray().length = 1;
+    // this.currentTotal.set(0);
+    this.cdRef.detectChanges(); 
+
+     
+  }
+
+  cancelInsert() {
+    this.confirmationPopupVisible.set(false);
+    this.pendingSaleEntry.set(null);
+  }
+
+  confirmInsert() {
+    const entry = this.pendingSaleEntry();
+    if (!entry) return;
+  
+    const products = this.confirmationDetails();
+  
+    const customer = this.customersObjectAvailables().find(c => c.name === entry.Customer);
+    const subTotal = this.confirmationTotal();
+    const taxAmt = 123; 
+    
+    const saleOrderDetails = products.map(p => ({
+      salesOrderID: 75139,
+      CarrierTrackingNumber: "XYZ123456",
+      OrderQty: p.quantity,
+      ProductId: this.productsObjectAvailables().find(prod => prod.name === p.product).productID,
+      SpecialOfferId: 1,
+      UnitPrice: p.unitPrice,
+      UnitPriceDiscount: 0.00,
+      LineTotal: p.total,
+      ModifiedDate: new Date().toISOString(),
+    }));
   
     const sale = {
-      SalesOrderHeader: { 
+      SalesOrderHeader: {
         salesOrderID: 75139,
         RevisionNumber: 1,
-        OrderDate: new Date().toISOString(), 
+        OrderDate: new Date().toISOString(),
         DueDate: new Date().toISOString(),
         ShipDate: new Date().toISOString(),
         Status: 5,
         OnlineOrderFlag: true,
-        SalesOrderNumber: entry.data.salesOrderNumber,
-        PurchaseOrderNumber: entry.data.purchaseOrderNumber,
-        AccountNumber: entry.data.accountNumber,
+        SalesOrderNumber: entry.salesOrderNumber,
+        PurchaseOrderNumber: entry.purchaseOrderNumber,
+        AccountNumber: entry.accountNumber,
         CustomerID: customer.customerID,
         SalesPersonID: 279,
         TerritoryID: 6,
@@ -318,30 +353,23 @@ export class Sales {
         SubTotal: subTotal,
         TaxAmt: taxAmt,
         Freight: 123,
-        TotalDue: subTotal - taxAmt,
-        Comment: entry.data.comment,
+        TotalDue: subTotal + taxAmt,
+        Comment: entry.comment,
         ModifiedDate: new Date().toISOString(),
       },
-      SalesOrderDetail: SaleOrderDetails
+      SalesOrderDetail: saleOrderDetails,
     };
-
-    // console.log(SaleOrderDetails)
-
-    console.log(sale)
- 
-    // this.salesService.createSaleOrder(sale).subscribe(s => {
-    //   console.log("done",s)
-    //   this.loadGridData();
-    //   this.closeTheForm();
-    //   notify("Added Sucessfully", "success", 3000)
-
-    // })
-    
-    this.productsArray().length = 1;
-    this.currentTotal.set(0);
-    this.cdRef.detectChanges(); 
-
-     
+  
+    this.salesService.createSaleOrder(sale).subscribe(s => {
+      notify("Added Successfully", "success", 3000);
+      this.loadGridData();
+      this.onFormClosed(); 
+    });
+    const grid = this.getGridInstance();
+    grid.cancelEditData();
+  
+    this.confirmationPopupVisible.set(false);
+    this.pendingSaleEntry.set(null);
   }
 
   addProduct(){
@@ -349,30 +377,48 @@ export class Sales {
     this.productsArray().push({})
     console.log(this.productsArray())
     this.cdRef.detectChanges();
-    //refresh UI using cdRef hello
+    //for refresh 
   }
 
-onProductSelected = (e: any) => {
-    console.log("Selected Product:", e);
+  removeProduct() {
+  if (this.productsArray().length === 1) return;
+  const productDataField = "Product" + (this.productsArray().length);
+  console.log(productDataField)
+  const grid = this.getGridInstance();
 
-    const gridInstance = this.dxDataGrid.instance as any;
-    const selectedRowKeys = gridInstance.option("selectedRowKeys");
-    const rowKey = selectedRowKeys.length ? selectedRowKeys[0] : null;
-    const columnName = e.component.option("dataField");
-    console.log(selectedRowKeys, rowKey, columnName);
 
-    if (gridInstance && rowKey !== null && columnName) {
-        let gridData = gridInstance.option("dataSource");
 
-        let rowIndex = gridData.findIndex((row: any) => row.salesOrderID === rowKey);
-        if (rowIndex !== -1) {
-            gridData[rowIndex][columnName] = e.value;
-            gridInstance.option("dataSource", gridData);
-            gridInstance.refresh();
-            console.log(`Updated ${columnName} in row ${rowIndex} with ${e.value}`);
-        }
-    }
-};
+
+
+
+
+  this.productsArray().pop();
+  this.cdRef.detectChanges();
+
+  }
+
+
+  // onProductSelected = (e: any) => {
+  //     console.log("Selected Product:", e);
+
+  //     const gridInstance = this.dxDataGrid.instance as any;
+  //     const selectedRowKeys = gridInstance.option("selectedRowKeys");
+  //     const rowKey = selectedRowKeys.length ? selectedRowKeys[0] : null;
+  //     const columnName = e.component.option("dataField");
+  //     console.log(selectedRowKeys, rowKey, columnName);
+
+  //     if (gridInstance && rowKey !== null && columnName) {
+  //         let gridData = gridInstance.option("dataSource");
+
+  //         let rowIndex = gridData.findIndex((row: any) => row.salesOrderID === rowKey);
+  //         if (rowIndex !== -1) {
+  //             gridData[rowIndex][columnName] = e.value;
+  //             gridInstance.option("dataSource", gridData);
+  //             gridInstance.refresh();
+  //             console.log(`Updated ${columnName} in row ${rowIndex} with ${e.value}`);
+  //         }
+  //     }
+  // };
 
 
 
@@ -384,6 +430,7 @@ onProductSelected = (e: any) => {
   handleFieldChange(e: any) {
     console.log(e)
   }
+
 
   onFormClosed = () => {
     console.log("Form closed")
@@ -398,6 +445,15 @@ onProductSelected = (e: any) => {
       icon: 'add',
       onClick: () => {
         this.addProduct();
+      }
+    }
+  );
+
+  removeButtonOptions = signal(
+    {
+      icon: 'trash',
+      onClick: () => {
+        this.removeProduct()
       }
     }
   );

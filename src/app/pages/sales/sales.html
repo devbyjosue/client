@@ -103,10 +103,17 @@
                     [dataField]="'comment'"
                 >
                 </dxi-item>
-                <dxi-item 
-                    itemType="button"
-                    [buttonOptions]="buttonOptions()">
-                    
+                 <dxi-item 
+                    itemType="group" 
+                    [colCount]="2"> 
+                    <dxi-item 
+                        itemType="button"
+                        [buttonOptions]="buttonOptions()">
+                    </dxi-item>
+                    <dxi-item 
+                        itemType="button"
+                        [buttonOptions]="removeButtonOptions()">
+                    </dxi-item>
                 </dxi-item>
                 
                 <dxi-item></dxi-item>
@@ -128,19 +135,27 @@
                         }"
                     >
                     </dxi-item>
-                    <dxi-item 
-                        [dataField]="'Quantity' + productsArray().indexOf(product)" 
-                        [validationRules]="[{ type: 'numeric' }]"
+                    <dxi-item
+                        [dataField]="'Quantity' + productsArray().indexOf(product)"
+                        editorType="dxNumberBox"
                         [editorOptions]="{
-                            dataSource: productsAvailable(), 
-                            placeholder: '1',
+                            format: '#',
+                            step: 1,
+                            min: 1,
+                            placeholder: '1'
                         }"
-                    >
-                    </dxi-item>
+                        [validationRules]="[
+                            { type: 'numeric' }
+                        ]"
+                        >
+                        </dxi-item>
+
                     <dxi-item></dxi-item>
+                    <!-- <div>{ type: 'required' },</div> -->
                 }
                 
-                 
+                                             
+
 
                 
                 
@@ -151,3 +166,39 @@
 </div>
 
 </div>
+
+
+<dx-popup 
+  [visible]="confirmationPopupVisible()" 
+  title="Confirm Sale"
+  [width]="700"
+  [height]="'auto'"
+  (onHiding)="confirmationPopupVisible.set(false)">
+  
+  <div *dxTemplate="let data of 'content'">
+    <div class="p-4">
+      <h3 class="text-lg font-semibold mb-2">Confirm Sale Details</h3>
+
+      <dx-data-grid 
+        [dataSource]="confirmationDetails()" 
+        [showBorders]="false"
+        [showColumnLines]="false"
+        >
+        
+        <dxi-column dataField="product" caption="Product"></dxi-column>
+        <dxi-column dataField="quantity" caption="Quantity"></dxi-column>
+        <dxi-column dataField="unitPrice" caption="Unit Price" format="currency"></dxi-column>
+        <dxi-column dataField="total" caption="Total" format="currency"></dxi-column>
+      </dx-data-grid>
+
+      <div class="mt-4 font-bold text-right">
+        Total Due: {{ confirmationTotal() | currency }}
+      </div>
+
+      <div class="mt-6 flex justify-end gap-2">
+        <dx-button text="Cancel" (onClick)="cancelInsert()" stylingMode="outlined"></dx-button>
+        <dx-button text="Confirm" (onClick)="confirmInsert()" type="success"></dx-button>
+      </div>
+    </div>
+  </div>
+</dx-popup>

@@ -9,7 +9,7 @@ import notify from 'devextreme/ui/notify';
   providedIn: 'root'
 })
 export class RoleService {
-  private baseUrlRoles = 'http://localhost:5178/api/roles'; // Copied from info.ts
+  private baseUrlRoles = 'https://localhost:7229/api/roles'; // https://localhost:44320/api/roles
   private mockRoles: Role[] = [
     { id: 1, name: 'Admin', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
     { id: 2, name: 'Editor', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
