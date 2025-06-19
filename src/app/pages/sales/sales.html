@@ -151,3 +151,36 @@
 </div>
 
 </div>
+
+
+<dx-popup 
+  [visible]="confirmationPopupVisible()" 
+  title="Confirm Sale"
+  [width]="600"
+  [height]="'auto'"
+  (onHiding)="confirmationPopupVisible.set(false)">
+  
+  <div *dxTemplate="let data of 'content'">
+    <div class="p-4">
+      <h3 class="text-lg font-semibold mb-2">Confirm Sale Details</h3>
+
+      <dx-data-grid 
+        [dataSource]="confirmationDetails()" 
+        [showBorders]="true">
+        <dxi-column dataField="product" caption="Product"></dxi-column>
+        <dxi-column dataField="quantity" caption="Quantity"></dxi-column>
+        <dxi-column dataField="unitPrice" caption="Unit Price" format="currency"></dxi-column>
+        <dxi-column dataField="total" caption="Total" format="currency"></dxi-column>
+      </dx-data-grid>
+
+      <div class="mt-4 font-bold text-right">
+        Total Due: {{ confirmationTotal() | currency }}
+      </div>
+
+      <div class="mt-6 flex justify-end gap-2">
+        <dx-button text="Cancel" (onClick)="cancelInsert()" stylingMode="outlined"></dx-button>
+        <dx-button text="Confirm" (onClick)="confirmInsert()" type="success"></dx-button>
+      </div>
+    </div>
+  </div>
+</dx-popup>
