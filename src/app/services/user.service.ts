@@ -9,7 +9,7 @@ import notify from 'devextreme/ui/notify';
   providedIn: 'root'
 })
 export class UserService {
-  private baseUrl = 'https://localhost:7229/api/users'; //https://localhost:44320/api/users
+  private baseUrl = 'https://localhost:44320/api/users';
   private mockUsers: user[] = [
     { id: 1, name: 'Alice Wonderland', voucher: 'VOUCHER001', roleName: "user", createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
     { id: 2, name: 'Bob The Builder', voucher: 'VOUCHER002', roleName: "user", createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
@@ -20,7 +20,7 @@ export class UserService {
   constructor(private http: HttpClient) { }
 
   getUsers(): Observable<user[]>{
-    return this.http.get<user[]>(this.baseUrl).pipe( 
+    return this.http.get<user[]>(this.baseUrl,  { withCredentials: true }).pipe( 
       catchError(err => {
         console.error('Error fetching users:', err);
         return of([]); 
@@ -32,9 +32,18 @@ export class UserService {
     return of();
   }
   getUserByName(name: string): Observable<user>{
-    return this.http.get<user>(this.baseUrl + "/name/"+ name).pipe( 
+    return this.http.get<user>(this.baseUrl + "/name/"+ name,  { withCredentials: true }).pipe( 
       catchError(err => {
         console.error('Error fetching users:', err);
+        return of(); 
+      })
+    );
+  }
+
+  getUserByvBadge(vBadge: string): Observable<user>{
+    return this.http.get<user>(this.baseUrl + "/vBadge/"+ vBadge,  { withCredentials: true }).pipe( 
+      catchError(err => {
+        console.error('Error fetching auth user:', err);
         return of(); 
       })
     );
@@ -47,7 +56,7 @@ export class UserService {
         updatedAt: new Date().toISOString() 
     };
 
-    return this.http.post<user>(this.baseUrl, userWithId).pipe(
+    return this.http.post<user>(this.baseUrl, userWithId,  { withCredentials: true }).pipe(
       catchError(err => {
         notify("User Already Exists", "error", 3000)
         throw err; 
@@ -56,7 +65,7 @@ export class UserService {
   }
 
   updateUser(userToUpdate: user | any): Observable<user | undefined>{
-   return this.http.put<user>(`${this.baseUrl}/${userToUpdate.id}`, userToUpdate).pipe(
+   return this.http.put<user>(`${this.baseUrl}/${userToUpdate.id}`, userToUpdate,  { withCredentials: true }).pipe(
     catchError(err => {
       console.error('Error updating user:', err);
       throw err;
@@ -65,7 +74,7 @@ export class UserService {
   }
 
   deleteUser(id: number): Observable<boolean>{ 
-    return this.http.delete<boolean>(`${this.baseUrl}/${id}`).pipe(
+    return this.http.delete<boolean>(`${this.baseUrl}/${id}`,  { withCredentials: true }).pipe(
       map(() => true), 
       catchError(err => {
         console.error('Error deleting User from server:', err);

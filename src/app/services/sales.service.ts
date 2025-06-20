@@ -7,12 +7,12 @@ import { catchError } from 'rxjs/operators';
   providedIn: 'root'
 })
 export class SalesService {
-  private baseUrlSales = 'https://localhost:7229/api/sales'; //https://localhost:44320/api/sales
+  private baseUrlSales = 'https://localhost:7229/api/sales';
 
   constructor(private http: HttpClient) { }
 
   getSalesOrdersHeaders(): Observable<any[]>{
-    return this.http.get<any[]>(this.baseUrlSales).pipe( 
+    return this.http.get<any[]>(this.baseUrlSales,  { withCredentials: true }).pipe( 
       catchError(err => {
         console.error("Error fetching sales order headers:", err);
         return of([]); 
@@ -21,7 +21,7 @@ export class SalesService {
   }
 
   getSalesOrderDetails(salesOrderId: number): Observable<any[]> {
-    return this.http.get<any[]>(`${this.baseUrlSales}/details/${salesOrderId}`).pipe(
+    return this.http.get<any[]>(`${this.baseUrlSales}/details/${salesOrderId}`,  { withCredentials: true }).pipe(
       catchError(err => {
         console.error(`Error fetching sales order details for ID ${salesOrderId}:`, err);
         return of([]);
@@ -30,7 +30,7 @@ export class SalesService {
   }
 
   createSaleOrder(saleOrder: any): Observable<any[]>{
-    return this.http.post<any[]>(`${this.baseUrlSales}`, saleOrder).pipe(
+    return this.http.post<any[]>(`${this.baseUrlSales}`, saleOrder,  { withCredentials: true }).pipe(
       catchError(err => {
         console.error(`Error creating SaleOrder ${saleOrder}`, err);
         return of([]);
@@ -39,7 +39,7 @@ export class SalesService {
   }
 
   deleteSaleOrder(saleOrderId: number): Observable<any[]>{
-    return this.http.delete<any[]>(`${this.baseUrlSales + '/' + saleOrderId}`).pipe(
+    return this.http.delete<any[]>(`${this.baseUrlSales + '/' + saleOrderId}`,  { withCredentials: true }).pipe(
       catchError(err => {
         console.error(`Error deleting SaleOrder ${saleOrderId}`, err);
         return of([]);
@@ -48,7 +48,7 @@ export class SalesService {
   }
 
   getProducts(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.baseUrlSales}/products`).pipe(
+    return this.http.get<any[]>(`${this.baseUrlSales}/products`,  { withCredentials: true }).pipe(
       catchError(err => {
         console.error(`Error fetching products`, err);
         return of([]);
@@ -57,7 +57,7 @@ export class SalesService {
   }
 
   getCustomers(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.baseUrlSales}/customers`).pipe(
+    return this.http.get<any[]>(`${this.baseUrlSales}/customers`,  { withCredentials: true }).pipe(
       catchError(err => {
         console.error(`Error fetching customers`, err);
         return of([])

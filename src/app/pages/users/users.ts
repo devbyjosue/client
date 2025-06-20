@@ -60,7 +60,7 @@ export class Users implements OnInit {
       this.roleService.getRoles().subscribe(roles => {
         const rolesName = roles.map(role => role.name)
         this.rolesAvailables.set(rolesName)
-        console.log("roleees",rolesName)
+        // console.log("roleees",rolesName)
       })
 
       this.loadGridData();
@@ -146,6 +146,7 @@ export class Users implements OnInit {
           ...baseUpdatedUser,
           roleId: role.id
         };
+        console.log('Updated user:', updatedUser);
 
         this.userService.updateUser(updatedUser).subscribe({ 
           next: (response) => {
@@ -154,7 +155,7 @@ export class Users implements OnInit {
             this.loadGridData();
           },
           error: (error) => {
-            notify("Deleted Sucessfully", "error", 3000)
+            notify("Error Updating", "error", 3000)
             console.error('Failed to update user:', error);
           }
         });

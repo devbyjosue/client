@@ -8,12 +8,12 @@ import { Menu, MenuRole } from '../../types';
   providedIn: 'root'
 })
 export class MenuService {
-  private baseUrlMenus = 'https://localhost:7229/api/menus'; //https://localhost:44320/api/menus
+  private baseUrlMenus = 'https://localhost:7229/api/menus';
 
   constructor(private http: HttpClient) { }
 
   getMenus(): Observable<Menu[]>{
-    return this.http.get<Menu[]>(this.baseUrlMenus).pipe(
+    return this.http.get<Menu[]>(this.baseUrlMenus,  { withCredentials: true }).pipe(
       catchError(err => {
         console.error('Error fetching menus:', err);
         return of([]); 
@@ -22,7 +22,7 @@ export class MenuService {
   }
 
   createMenu(menu: Menu): Observable<Menu>{
-    return this.http.post<Menu>(this.baseUrlMenus, menu).pipe(
+    return this.http.post<Menu>(this.baseUrlMenus, menu,  { withCredentials: true }).pipe(
       catchError(err => {
         console.error('Error creating menu:', err);
         return of(err);
@@ -31,7 +31,7 @@ export class MenuService {
   }
 
   deleteMenu(id: number): Observable<boolean>{
-    return this.http.delete(this.baseUrlMenus+ "/" + id).pipe(
+    return this.http.delete(this.baseUrlMenus+ "/" + id,  { withCredentials: true }).pipe(
       map(() => true),
       catchError(err => {
         console.error('Error deleting menu from server:', err);
@@ -42,7 +42,7 @@ export class MenuService {
 
   updateMenu(menuToUpdate : Menu): Observable<Menu | undefined>{
     console.log('Updating menu:', menuToUpdate);
-    return this.http.put<Menu>(this.baseUrlMenus + "/" + menuToUpdate.id, menuToUpdate).pipe(
+    return this.http.put<Menu>(this.baseUrlMenus + "/" + menuToUpdate.id, menuToUpdate,  { withCredentials: true }).pipe(
       catchError(err => {
         console.error('Error updating menu:', err);
         return of(undefined); 
@@ -51,7 +51,7 @@ export class MenuService {
   }
 
   getMenuRoles(): Observable<any[]>{
-    return this.http.get<MenuRole[]>(this.baseUrlMenus+"/"+"menu-roles").pipe( 
+    return this.http.get<MenuRole[]>(this.baseUrlMenus+"/"+"menu-roles",  { withCredentials: true }).pipe( 
       catchError(err => {
         console.error('Error fetching menuRoles:', err);
         return of([]); 
@@ -67,7 +67,7 @@ export class MenuService {
 
   updateMenuRoles(id: number, updatedMenu: { id: Number, canView: Boolean, canEdit: Boolean}): Observable<MenuRole[]> {
 
-    return this.http.put<MenuRole[]>(`${this.baseUrlMenus}/menu-roles/${id}`, updatedMenu).pipe(
+    return this.http.put<MenuRole[]>(`${this.baseUrlMenus}/menu-roles/${id}`, updatedMenu,  { withCredentials: true }).pipe(
       catchError(err => {
         console.error(`Error updating the menu of id: ${id}`, err);
         return of([]);
