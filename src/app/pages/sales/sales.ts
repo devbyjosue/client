@@ -1,7 +1,8 @@
 import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DxDataGridModule, DxButtonModule, DxSelectBoxModule , 
-  DxFormModule, DxTextBoxModule, DxPopupModule } from 'devextreme-angular';
+  DxFormModule, DxTextBoxModule, DxPopupModule, 
+  DxFormComponent} from 'devextreme-angular';
 import { ChangeDetectorRef } from '@angular/core';
 import { capitalize } from '../../../utils/capitalize';
 import notify from 'devextreme/ui/notify';
@@ -53,8 +54,15 @@ export class Sales {
   confirmationTotal = signal<number>(0);
   pendingSaleEntry = signal<any>(null);
 
-  @ViewChild(DxDataGridComponent, { static: false }) dataGrid!: DxDataGridComponent;
+  isFormPopupVisible = signal(false);
+  formData = signal<any>({});
+  currentSelectedProduct = signal<any>(null)
+  currentSelectedQuantity = signal<number>(1)
 
+
+
+  @ViewChild(DxDataGridComponent, { static: false }) dataGrid!: DxDataGridComponent;
+  @ViewChild('dxForm', { static: false }) dxForm!: DxFormComponent;
 
   constructor(
     private route: ActivatedRoute,
@@ -146,6 +154,10 @@ export class Sales {
       );
 
       this.salesService.getProducts().subscribe(products => {
+        if (products.length === 0) products = [
+          {productID:  1, name: "Product A", standardCost: 100 },
+          {productID:  2, name: "Product B", standardCost: 200 },
+        ];
         this.productsObjectAvailables.set(products)
 
         const productNames = products.map(p => p.name + " - $" + p.standardCost.toFixed(2))
@@ -167,21 +179,78 @@ export class Sales {
         return this.dxDataGrid.instance;
     }
 
+    openAddForm(): void {
+      // this.productsArray.set([{}]); 
+      this.formData.set({});
+      this.isFormPopupVisible.set(true);
+  }
+  cancelForm(): void {
+    this.isFormPopupVisible.set(false);
+    this.confirmationDetails().length = 0;
+    this.confirmationTotal.set(0);
+    } 
 
- 
+    
+    handleFormSubmit(event: any): void {
+      event.preventDefault();
+      const validation = this.dxForm.instance.validate();
+      if (!validation.isValid) return;
+      const entryData = this.formData();
+
+      this.pendingSaleEntry.set(entryData);
+      console.log(entryData)
+      // console.log(this.confirmationDetails())
+      // console.log(this.confirmationTotal())
+      
+      const products = this.productsObjectAvailables().filter(p => {
+        return this.confirmationDetails().find(c => c.product === p.name)
+      })
+      console.log(products)
+
+      const customer = this.customersObjectAvailables().find(c => c.name === event.Customer);
+      const subTotal = this.confirmationTotal();
+      const taxAmt = 123; 
+      
+      const saleOrderDetails = products.map(p => ({
+        salesOrderID: 75139,
+        CarrierTrackingNumber: "XYZ123456",
+        OrderQty: p.quantity,
+        ProductId: this.productsObjectAvailables().find(prod => prod.name === p.name).productID,
+        SpecialOfferId: 1,
+        UnitPrice: p.unitPrice,
+        UnitPriceDiscount: 0.00,
+        LineTotal: p.total,
+        ModifiedDate: new Date().toISOString(),
+      }));
+
+      console.log(saleOrderDetails)
+
+      // const productsToConfirm = this.productsArray().map((_, index) => {
+      //     const productNameFull = entryData[`Product${index}`];
+      //     const quantity = entryData[`Quantity${index}`];
+      //     if (!productNameFull || !quantity) return null;
+
+      //     const productName = String(productNameFull).split(" - $")[0];
+      //     const product = this.productsObjectAvailables().find(p => p.name === productName);
+      //     return {
+      //         product: product.name, productId: product.productID, quantity: parseInt(quantity, 10),
+      //         unitPrice: product.standardCost, total: parseInt(quantity, 10) * product.standardCost,
+      //     };
+      // }).filter(p => p !== null);
+
+      // if (productsToConfirm.length === 0) {
+      //     notify("Please select at least one product.", "error", 3000);
+      //     return;
+      // }
+
+      // this.confirmationDetails.set(productsToConfirm as any[]);
+      // this.confirmationTotal.set(productsToConfirm.reduce((sum, p) => sum + p.total, 0));
+      // this.confirmationPopupVisible.set(true);
+    }
+
 
   capitalize = capitalize;
 
-
-
-  onEditorPreparing(e:any) {
-    if (e.dataField === "id" || e.dataField === "updatedAt") {
-      e.editorOptions.visible = false;
-      e.editorOptions.label = { visible: false };
-      e.editorOptions.label.visible = false
-      console.log(e)
-    }
-  }
 
   onRowClick(e: any) {
     const salesOrderID = e.data.salesOrderID;
@@ -199,29 +268,6 @@ export class Sales {
         this.getDetailGridDataSource.set(details);
     });
 }
-
-  openForm(isEditing = false, data: any = null){
-    this.formSignal.set(true);
-  }
-
-  closeTheForm(){
-    this.formSignal.set(false);
-  }
-
-  
-  onRowUpdating(e: any) {
-    
-    console.log('Row updating:', e);
-    
-    const idToUpdate = e.key; 
-     if (!idToUpdate) {
-        console.error('Cannot update item without ID');
-        e.cancel = true; 
-        return;
-    }
-
-    //here to update letsgo
-  }
 
   onRowRemoving(e: any) {
     console.log('Row removing:', e.data.salesOrderID); 
@@ -321,11 +367,11 @@ export class Sales {
       salesOrderID: 75139,
       CarrierTrackingNumber: "XYZ123456",
       OrderQty: p.quantity,
-      ProductId: this.productsObjectAvailables().find(prod => prod.name === p.product).productID,
+      ProductId: this.productsObjectAvailables().find(prod => prod.name === p.name).productID,
       SpecialOfferId: 1,
       UnitPrice: p.unitPrice,
       UnitPriceDiscount: 0.00,
-      LineTotal: p.total,
+      LineTotal: p.total || 0,
       ModifiedDate: new Date().toISOString(),
     }));
   
@@ -373,11 +419,25 @@ export class Sales {
   }
 
   addProduct(){
+    const productName = this.currentSelectedProduct()//'placeholder';
+    const quantity = this.currentSelectedQuantity()//1;
+    
+    //obtain the rest of the product object by name and add to it the quantity
+    const product = this.productsObjectAvailables().find(p => p.name === productName);
+    console.log(product)
+
+    const productToPush = {
+      product: product.name, 
+      quantity: quantity,
+      unitPrice: product.standardCost,
+      total: quantity * product.standardCost,
+    }
+    this.confirmationTotal.set(this.confirmationTotal() + productToPush.total)
+
     console.log("Adding product to the form");
-    this.productsArray().push({})
-    console.log(this.productsArray())
+    this.confirmationDetails().push(productToPush)
+    console.log(this.confirmationDetails())
     this.cdRef.detectChanges();
-    //for refresh 
   }
 
   removeProduct() {
@@ -397,38 +457,14 @@ export class Sales {
 
   }
 
-
-  // onProductSelected = (e: any) => {
-  //     console.log("Selected Product:", e);
-
-  //     const gridInstance = this.dxDataGrid.instance as any;
-  //     const selectedRowKeys = gridInstance.option("selectedRowKeys");
-  //     const rowKey = selectedRowKeys.length ? selectedRowKeys[0] : null;
-  //     const columnName = e.component.option("dataField");
-  //     console.log(selectedRowKeys, rowKey, columnName);
-
-  //     if (gridInstance && rowKey !== null && columnName) {
-  //         let gridData = gridInstance.option("dataSource");
-
-  //         let rowIndex = gridData.findIndex((row: any) => row.salesOrderID === rowKey);
-  //         if (rowIndex !== -1) {
-  //             gridData[rowIndex][columnName] = e.value;
-  //             gridInstance.option("dataSource", gridData);
-  //             gridInstance.refresh();
-  //             console.log(`Updated ${columnName} in row ${rowIndex} with ${e.value}`);
-  //         }
-  //     }
-  // };
-
-
-
-
-  selectedProductValuesFunc = (index: number) => {
-    return this.selectedProductValues()[index]
+  onProductValueChanged = (e:any) => {
+    this.currentSelectedProduct.set(e.value);
   }
-
-  handleFieldChange(e: any) {
-    console.log(e)
+  // onQuantityValueChanged(e:any){
+  //   this.currentSelectedQuantity.set(e.value);
+  // }
+  onQuantityValueChanged = (e:any) => {
+    this.currentSelectedQuantity.set(e.value);
   }
 
 

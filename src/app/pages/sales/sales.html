@@ -1,205 +1,138 @@
-<div class="info-container p-4 md:p-8 bg-white min-h-screen">
-    
-    <div class=" rounded-lg overflow-hidden">
-    <dx-data-grid
-        [dataSource]="dataSource()" 
-        [columns]="columnConfigurations()"
-        [showBorders]="false"
-        [showColumnLines]="false"
-        [hoverStateEnabled]="true"
-        [rowAlternationEnabled]="true"
-        (onRowClick)="onRowClick($event)"
-        (onRowUpdating)="onRowUpdating($event)" 
-        (onRowInserting)="onRowInserting($event)"
-        (onRowRemoving)="onRowRemoving($event)"
-        (onCellPrepared)="onCellPrepared($event)"
-        (onEditorPreparing)="onEditorPreparing($event)"
-        [keyExpr]="gridKeyField()"  
-        class="w-full"
-    >
-        <dxo-master-detail
-            [enabled]="true"
-            template="detailGridTemplate"
-        ></dxo-master-detail>
+<div class="info-container p-4 md:p-8 bg-white min-h-screen w-screen gap-4 flex flex-col">
+  <div class=" w-full flex justify-end">
+    <dx-button 
+      icon="add"
+      (click)="openAddForm()">
+    </dx-button>
+  </div>
+  <div class=" rounded-lg overflow-hidden w-full">
+      <dx-data-grid
+          #dataGrid
+          [dataSource]="dataSource()" 
+          [columns]="columnConfigurations()"
+          [keyExpr]="gridKeyField()" 
+          [showBorders]="false"
+          [showColumnLines]="false"
+          [hoverStateEnabled]="true"
+          [rowAlternationEnabled]="true"
+          (onRowRemoving)="onRowRemoving($event)"
+          (onCellPrepared)="onCellPrepared($event)"
+          class="w-full"
+      >
+          <dxo-master-detail
+              [enabled]="true"
+              template="detailGridTemplate"
+          ></dxo-master-detail>
 
-        <div *dxTemplate="let salesOrder of 'detailGridTemplate'">
-            <dx-data-grid
-                [dataSource]="getDetailGridDataSource()"
-                [columns]="detailColumnConfigurations()"                
-                (onCellPrepared)="onCellPrepared($event)"
-                (onRowInserting)="onRowInserting($event)"
-                [showBorders]="false"
-                [showColumnLines]="false"
-                [hoverStateEnabled]="true"
-                [rowAlternationEnabled]="true"
-                [keyExpr]="'salesOrderDetailID'"
-            >
-                <dxo-paging [pageSize]="5"></dxo-paging>
-                <dxo-pager
-                    [showPageSizeSelector]="true"
-                    [allowedPageSizes]="[5, 10, 20]"
-                    [showInfo]="true">
-                </dxo-pager>
-            </dx-data-grid>
-        </div>
-  
-    
-        <dxo-paging [pageSize]="10"></dxo-paging>
-        <dxo-pager
-            [showPageSizeSelector]="true"
-            [allowedPageSizes]="[5, 10, 20]"
-            [showInfo]="true">
-        </dxo-pager>
-        <dxo-editing 
-            mode="popup" 
-            [allowDeleting]="true"
-            [allowAdding]="true"
-            [useIcons]="true">
-            <dxo-popup 
-                [title]="'Sales Order Form'"
-                [showTitle]="true"
-                [onHidden]="onFormClosed"
-                [width]="1280"
-                [height]="'auto'">
-            </dxo-popup>
+          <div *dxTemplate="let salesOrder of 'detailGridTemplate'">
+              <dx-data-grid
+                  [dataSource]="getDetailGridDataSource()"
+                  [columns]="detailColumnConfigurations()"
+                  [keyExpr]="'salesOrderDetailID'"
+              >
+                  <dxo-paging [pageSize]="5"></dxo-paging>
+              </dx-data-grid>
+          </div>
+          
+          <dxo-paging [pageSize]="10"></dxo-paging>
+          <dxo-pager
+              [showPageSizeSelector]="true"
+              [allowedPageSizes]="[5, 10, 20]"
+              [showInfo]="true">
+          </dxo-pager>
 
-
-        
-
-            <dxo-form
-            [colCount]="3"
-            (onFieldDataChanged)="handleFieldChange($event)"
-            >
-                   
-                <dxi-item 
-                    [dataField]="'Customer'"
-                    editorType="dxSelectBox"
-                    [editorOptions]="{
-                        dataSource: customersAvailable(),
-                        placeholder: 'Select a Customer',
-                        searchEnabled: true
-                    }"
-                >
-                </dxi-item>
-
-                <dxi-item
-                    [dataField]="'salesOrderNumber'"
-                >
-
-                </dxi-item>
-                
-                <dxi-item
-                    [dataField]="'purchaseOrderNumber'"
-                >
-
-                </dxi-item>
-                
-                
-                <dxi-item
-                    [dataField]="'accountNumber'"
-                >
-                </dxi-item>
-
-                <dxi-item
-                    [dataField]="'comment'"
-                >
-                </dxi-item>
-                 <dxi-item 
-                    itemType="group" 
-                    [colCount]="2"> 
-                    <dxi-item 
-                        itemType="button"
-                        [buttonOptions]="buttonOptions()">
-                    </dxi-item>
-                    <dxi-item 
-                        itemType="button"
-                        [buttonOptions]="removeButtonOptions()">
-                    </dxi-item>
-                </dxi-item>
-                
-                <dxi-item></dxi-item>
-                
-                <dxi-item></dxi-item>
-                <dxi-item></dxi-item>
-
-                
-        
-                    
-                @for(product of productsArray(); track product){
-                    <dxi-item 
-                        [dataField]="'Product' + productsArray().indexOf(product)" 
-                        editorType="dxSelectBox"
-                        [editorOptions]="{
-                            dataSource: productsAvailable(), 
-                            placeholder: 'Select a product',
-                            searchEnabled: true
-                        }"
-                    >
-                    </dxi-item>
-                    <dxi-item
-                        [dataField]="'Quantity' + productsArray().indexOf(product)"
-                        editorType="dxNumberBox"
-                        [editorOptions]="{
-                            format: '#',
-                            step: 1,
-                            min: 1,
-                            placeholder: '1'
-                        }"
-                        [validationRules]="[
-                            { type: 'numeric' }
-                        ]"
-                        >
-                        </dxi-item>
-
-                    <dxi-item></dxi-item>
-                    <!-- <div>{ type: 'required' },</div> -->
-                }
-                
-                                             
-
-
-                
-                
-            </dxo-form>
-        </dxo-editing>
-        
-    </dx-data-grid>
+          <dxo-editing 
+              mode="row" 
+              [allowDeleting]="true"
+              [allowUpdating]="true"
+              [useIcons]="true">
+          </dxo-editing>
+      </dx-data-grid>
+  </div>
 </div>
-
-</div>
-
 
 <dx-popup 
-  [visible]="confirmationPopupVisible()" 
-  title="Confirm Sale"
-  [width]="700"
+  [visible]="isFormPopupVisible()" 
+  [title]="'Sales Order Form'"
+  [width]="1280"
   [height]="'auto'"
-  (onHiding)="confirmationPopupVisible.set(false)">
+  (onHiding)="cancelForm()">
   
   <div *dxTemplate="let data of 'content'">
-    <div class="p-4">
-      <h3 class="text-lg font-semibold mb-2">Confirm Sale Details</h3>
+      <form (submit)="handleFormSubmit($event)">
+          <dx-form
+              #dxForm
+              [formData]="formData()"
+              [colCount]="3"
+          >
+              <dxi-item 
+                  dataField="Customer"
+                  editorType="dxSelectBox"
+                  [editorOptions]="{
+                      dataSource: ['Customer A', 'Customer B', 'Customer C', 'Customer D', 'Customer E'],
+                      placeholder: 'Select a Customer',
+                      searchEnabled: true
+                  }"
+                  [validationRules]="[{ type: 'required', message: 'Customer is required' }]">
+              </dxi-item>
+              <dxi-item dataField="salesOrderNumber" [validationRules]="[{ type: 'required' }]"></dxi-item>
+              <dxi-item dataField="purchaseOrderNumber" [validationRules]="[{ type: 'required' }]"></dxi-item>
+              <dxi-item dataField="accountNumber" [validationRules]="[{ type: 'required' }]"></dxi-item>
+              <dxi-item dataField="comment" [colSpan]="2"></dxi-item>
+              
+              <dxi-item itemType="group" caption="Products" [colSpan]="3">
+                  <dxi-item itemType="group" [colCount]="4">
+                    <dxi-item 
+                    [dataField]="'Product'" 
+                    editorType="dxSelectBox"
+                    [editorOptions]="{
+                        dataSource: ['Product A', 'Product B', 'Product C', 'Product D', 'Product E'],
+                        placeholder: 'Select product',
+                        searchEnabled: true,
+                        value: currentSelectedProduct(),
+                        onValueChanged: onProductValueChanged
 
-      <dx-data-grid 
-        [dataSource]="confirmationDetails()" 
-        [showBorders]="false"
-        [showColumnLines]="false"
-        >
-        
-        <dxi-column dataField="product" caption="Product"></dxi-column>
-        <dxi-column dataField="quantity" caption="Quantity"></dxi-column>
-        <dxi-column dataField="unitPrice" caption="Unit Price" format="currency"></dxi-column>
-        <dxi-column dataField="total" caption="Total" format="currency"></dxi-column>
-      </dx-data-grid>
+                    }"
+                    [validationRules]="[{ type: 'required' }]">
+                </dxi-item>
+                <dxi-item
+                    [dataField]="'Quantity'"
+                    editorType="dxNumberBox"
+                    [editorOptions]="{
+                        format: '#', 
+                        step: 1, 
+                        min: 1, 
+                        placeholder: '1',
+                        value: currentSelectedQuantity(),
+                        onValueChanged: onQuantityValueChanged
+                        }"
+                    [validationRules]="[{ type: 'required' }, { type: 'numeric' }]">
+                </dxi-item>
+                  <dxi-item type="empty"></dxi-item>
+                  <dxi-item itemType="button" [buttonOptions]="buttonOptions()"></dxi-item>
+                      <!-- <dxi-item itemType="button" [buttonOptions]="removeButtonOptions()"></dxi-item> -->
+                  </dxi-item>
+                  
+                  
+              </dxi-item>
+          </dx-form>
+          
+          <dx-data-grid 
+          [dataSource]="confirmationDetails()" 
+          [showBorders]="false"
+          >
+            <dxi-column dataField="product" caption="Product"></dxi-column>
+            <dxi-column dataField="quantity" caption="Quantity"></dxi-column>
+            <dxi-column dataField="unitPrice" caption="Unit Price" format="currency"></dxi-column>
+            <dxi-column dataField="total" caption="Total" format="currency"></dxi-column>
+          </dx-data-grid>
+          <div class="mt-4 font-bold text-right">Total Due: {{ confirmationTotal() | currency }}</div>
 
-      <div class="mt-4 font-bold text-right">
-        Total Due: {{ confirmationTotal() | currency }}
-      </div>
-
-      <div class="mt-6 flex justify-end gap-2">
-        <dx-button text="Cancel" (onClick)="cancelInsert()" stylingMode="outlined"></dx-button>
-        <dx-button text="Confirm" (onClick)="confirmInsert()" type="success"></dx-button>
-      </div>
-    </div>
+          <div class="mt-6 flex justify-end gap-2">
+              <dx-button text="Cancel" (onClick)="cancelForm()"></dx-button>
+              <dx-button text="Save" type="success" [useSubmitBehavior]="true"></dx-button>
+          </div>
+      </form>
   </div>
 </dx-popup>
+
