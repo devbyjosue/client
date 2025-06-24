@@ -6,6 +6,7 @@ import { capitalize } from 'src/utils/capitalize';
 import { DxDataGridModule, DxButtonModule, DxSelectBoxModule , DxFormModule, DxTextBoxModule } from 'devextreme-angular';
 import { CommonModule } from '@angular/common';
 import notify from 'devextreme/ui/notify';
+import { UserContextService } from 'src/app/services/user-context.service';
 
 
 @Component({
@@ -35,8 +36,8 @@ export class Users implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private userService: UserService, 
-    private roleService: RoleService
-    ) {
+    private roleService: RoleService,
+    private userContext: UserContextService    ) {
 
     }
 
@@ -100,7 +101,7 @@ export class Users implements OnInit {
       e.editorOptions.visible = false;
       e.editorOptions.label = { visible: false };
       e.editorOptions.label.visible = false
-      console.log(e)
+      // console.log(e)
     }
   }
   
@@ -116,7 +117,7 @@ export class Users implements OnInit {
 
   onRowUpdating(e: any) {
     
-    console.log('Row updating:', e);
+    // console.log('Row updating:', e);
     
     const idToUpdate = e.key; 
      if (!idToUpdate) {
@@ -146,13 +147,14 @@ export class Users implements OnInit {
           ...baseUpdatedUser,
           roleId: role.id
         };
-        console.log('Updated user:', updatedUser);
+        // console.log('Updated user:', updatedUser);
 
         this.userService.updateUser(updatedUser).subscribe({ 
           next: (response) => {
             notify("Updated Sucessfully", "success", 3000)
-            console.log('User updated successfully');
+            // console.log('User updated successfully');
             this.loadGridData();
+            this.userContext.refresh(); 
           },
           error: (error) => {
             notify("Error Updating", "error", 3000)
@@ -167,7 +169,7 @@ export class Users implements OnInit {
   }
 
   onRowRemoving(e: any) {
-    console.log('Row removing:', e.data); 
+    // console.log('Row removing:', e.data); 
     const idToDelete = e.data.id; 
 
     if (!idToDelete) {
@@ -179,7 +181,7 @@ export class Users implements OnInit {
     this.userService.deleteUser(idToDelete).subscribe(success => { 
         if (success) {
             notify("Deleted Sucessfully", "success", 3000)
-            console.log('User deleted successfully');
+            // console.log('User deleted successfully');
              this.loadGridData(); 
         } else {
             console.error('Failed to delete user');
@@ -190,7 +192,7 @@ export class Users implements OnInit {
   }
 
   onRowInserting(entry: any){
-    console.log("Form submitted with entry:", entry);
+    // console.log("Form submitted with entry:", entry);
 
     this.roleService.getRoleByName(entry.data.roleName).subscribe(role => {
       if (!role){
@@ -204,11 +206,11 @@ export class Users implements OnInit {
           updatedAt: new Date().toISOString()
       };
 
-      console.log(newUser)
+      // console.log(newUser)
       this.userService.createUser(newUser).subscribe({
         next: (createdUser) => {
           notify("Created Sucessfully", "success", 3000)
-          console.log('User created successfully:', createdUser);
+          // console.log('User created successfully:', createdUser);
           this.loadGridData();
           this.closeTheForm();
         },

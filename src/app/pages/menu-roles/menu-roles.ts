@@ -59,11 +59,11 @@ loadGridData(): void {
   if (this.selectedRole() === '') return
 
   this.menuService.getMenuRoles().subscribe(menuRoles => {
-    console.log(menuRoles)
+    // console.log(menuRoles)
 
     const currentSelectedMenuData = menuRoles.filter(m => m.roleName == this.selectedRole())
 
-    console.log(currentSelectedMenuData)
+    // console.log(currentSelectedMenuData)
     
   
     const allMenus = [
@@ -88,7 +88,7 @@ loadGridData(): void {
       e.editorOptions.visible = false;
       e.editorOptions.label = { visible: false };
       e.editorOptions.label.visible = false
-      console.log(e)
+      // console.log(e)
     }
   }
 
@@ -108,7 +108,7 @@ loadGridData(): void {
 
   
 onRowUpdating(e: any) {
-    console.log('Row updating:', e);
+    // console.log('Row updating:', e);
     
     const idToUpdate = e.key; 
     if (!idToUpdate) {
@@ -122,13 +122,13 @@ onRowUpdating(e: any) {
         canView: e.newData.hasOwnProperty('canView') ? e.newData.canView : e.oldData.canView,
         canEdit: e.newData.hasOwnProperty('canEdit') ? e.newData.canEdit : e.oldData.canEdit
     }
-    console.log(updatedMenuRole)
+    // console.log(updatedMenuRole)
 
     this.menuService.updateMenuRoles(e.key, updatedMenuRole).subscribe(menuRole => { 
-        console.log(menuRole)
+        // console.log(menuRole)
         if (menuRole && menuRole.length > 0) { 
             notify("Updated Sucessfully", "success", 3000)
-            console.log('MenuRole updated successfully')
+            // console.log('MenuRole updated successfully')
             this.loadGridData();
         } else {
           notify("Error updating", "error", 3000)
@@ -139,7 +139,7 @@ onRowUpdating(e: any) {
 }
 
   onRowRemoving(e: any) {
-    console.log('Row removing:', e.data); 
+    // console.log('Row removing:', e.data); 
     const idToDelete = e.data.id; 
 
     if (!idToDelete) {
@@ -161,7 +161,7 @@ onRowUpdating(e: any) {
   }
 
   onRowInserting(entry: any){
-    console.log("Form submitted with entry:", entry);
+    // console.log("Form submitted with entry:", entry);
 
     
   }

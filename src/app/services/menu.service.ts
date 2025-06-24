@@ -1,3 +1,4 @@
+
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
@@ -8,7 +9,7 @@ import { Menu, MenuRole } from '../../types';
   providedIn: 'root'
 })
 export class MenuService {
-  private baseUrlMenus = 'https://localhost:7229/api/menus';
+  private baseUrlMenus = 'https://localhost:44320/api/menus';
 
   constructor(private http: HttpClient) { }
 
@@ -41,7 +42,7 @@ export class MenuService {
   }
 
   updateMenu(menuToUpdate : Menu): Observable<Menu | undefined>{
-    console.log('Updating menu:', menuToUpdate);
+    // console.log('Updating menu:', menuToUpdate);
     return this.http.put<Menu>(this.baseUrlMenus + "/" + menuToUpdate.id, menuToUpdate,  { withCredentials: true }).pipe(
       catchError(err => {
         console.error('Error updating menu:', err);

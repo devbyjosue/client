@@ -67,7 +67,7 @@ export class Menus {
 
     
     this.menuService.getMenus().subscribe(menus => { 
-      console.log("Menus:", menus);
+      // console.log("Menus:", menus);
         this.dataSource.set(menus);
         this.columnConfigurations.set(
           [
@@ -91,7 +91,7 @@ export class Menus {
       e.editorOptions.visible = false;
       e.editorOptions.label = { visible: false };
       e.editorOptions.label.visible = false
-      console.log(e)
+      // console.log(e)
     }
   }
   
@@ -107,7 +107,7 @@ export class Menus {
   
   onRowUpdating(e: any) {
     
-    console.log('Row updating:', e);
+    // console.log('Row updating:', e);
     
     const idToUpdate = e.key; 
      if (!idToUpdate) {
@@ -125,7 +125,7 @@ export class Menus {
     this.menuService.updateMenu(updatedMenu).subscribe(updatedMenuResponse => {
       if (updatedMenuResponse) {
         notify("Updated Sucessfully", "success", 3000)
-          console.log('Menu updated successfully');
+          // console.log('Menu updated successfully');
           this.loadGridData();
       } else {
         notify("Error Updating", "error", 3000)
@@ -138,7 +138,7 @@ export class Menus {
   }
 
   onRowRemoving(e: any) {
-    console.log('Row removing:', e.data); 
+    // console.log('Row removing:', e.data); 
     const idToDelete = e.data.id; 
 
     if (!idToDelete) {
@@ -150,7 +150,7 @@ export class Menus {
     this.menuService.deleteMenu(idToDelete).subscribe(success => { 
       if (success) {
         notify("Delete Sucessfully", "success", 3000)
-          console.log('Menu deleted successfully');
+          // console.log('Menu deleted successfully');
           this.loadGridData(); 
       } else {
         notify("Error Deleting", "error", 3000)
@@ -161,7 +161,7 @@ export class Menus {
   }
 
   onRowInserting(entry: any){
-    console.log("Form submitted with entry:", entry);
+    // console.log("Form submitted with entry:", entry);
 
   
        
@@ -173,7 +173,7 @@ export class Menus {
     this.menuService.createMenu(newMenu).subscribe(createdMenu => { 
       if (createdMenu) {
         notify("Created Sucessfully", "success", 3000)
-        console.log('Menu created successfully:', createdMenu);
+        // console.log('Menu created successfully:', createdMenu);
         this.loadGridData();
         this.closeTheForm();
       } else {

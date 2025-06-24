@@ -25,7 +25,9 @@ class="flex gap-4 w-full h-8 justify-start px-4  items-center cursor-pointer  ">
         @for(subSection of sectionData.subLinks; track subSection) {
             <app-nav-sub-section 
             [route]="subSection.link" 
-            [name]="subSection.name"/>
+            [name]="subSection.name"
+            [sidebarData]="subSection.data"
+            />
         }
       }
 </section>

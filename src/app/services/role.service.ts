@@ -31,7 +31,7 @@ export class RoleService {
   getRoleByName(name: string): Observable<Role|undefined > {
     return this.http.get<Role>(`${this.baseUrlRoles}/name/${name}`,  { withCredentials: true }).pipe(
       map(role => {
-        console.log(role)
+        // console.log(role)
         return role
       })
     );
@@ -54,7 +54,7 @@ export class RoleService {
   }
 
   updateRole(roleToUpdate: Role): Observable<Role | undefined>{
-    console.log('Updating role:', roleToUpdate);
+    // console.log('Updating role:', roleToUpdate);
    return this.http.put<Role>(this.baseUrlRoles + "/" + roleToUpdate.id, roleToUpdate,  { withCredentials: true }).pipe(
     catchError(err => {
       console.error('Error updating role:', err);

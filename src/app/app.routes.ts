@@ -7,6 +7,7 @@ import { Roles } from './pages/roles/roles';
 import { Menus } from './pages/menus/menus';
 import { MenuRoles } from './pages/menu-roles/menu-roles';
 import { Sales } from './pages/sales/sales';
+import { Unauthorized } from './pages/unauthorized/unauthorized';
 
 export const routes: Routes = [
     {
@@ -15,40 +16,57 @@ export const routes: Routes = [
         title: 'Home Page'
     },
     {
-        path: 'configuration/users',
+        path: 'Users',
         component: Users,
-        title: 'Users'
+        title: 'Users',
+        data: { roles: ["TI Dev"] },
+
     },
     {
-        path: 'configuration/roles',
+        path: 'Roles',
         component: Roles,
-        title: 'Roles'
+        title: 'Roles',
+        data: { roles: ["TI Dev"] },
+
     },
     {
-        path: 'configuration/menus',
+        path: 'Menus',
         component: Menus,
-        title: 'Data Section'
+        title: 'Data Section',
+        data: { roles: ["TI Dev"] },
     },
     {
-        path: 'configuration/menu-roles',
+        path: 'MenuRoles',
         component: MenuRoles,
-        title: 'Data Section'
+        title: 'Data Section',
+        data: { roles: ["Admin","TI Dev"] },
     },
     {
-        path: 'admin/sales',
+        path: 'Sales',
         component: Sales,
         title: 'Data Section',
-        canActivate: [AuthGuard]
+        // canActivate: [AuthGuard],
+        data: { roles: ["Admin","User","TI Dev"] },
+    },
+    {
+        path: 'Configuration',
+        component: Home,
+        title: 'Data Section',
+    },
+    {
+        path: 'Testing',
+        component: Home,
+        title: 'Data Section',
+    },
+    {
+        path: 'IT',
+        component: Home,
+        title: 'Data Section',
+    },
+
+    {
+        path: 'unauthorized',
+        component: Unauthorized,
+        title: 'Unauthorized',
     }
-//     {
-//        path: ':section/:subSection',
-//        component: Info,
-//        title: 'Data Section'
-//     },
-//    {
-//        path: ':section/:subSection/table',
-//        component: Info,
-//        title: 'Data Section',
-//        canActivate: [AuthGuard]
-//     },
 ];

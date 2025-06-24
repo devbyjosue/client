@@ -11,6 +11,7 @@ import { Router, RouterModule } from '@angular/router';
 export class NavSubSection {
   @Input() route: string | undefined = "";
   @Input() name: string | undefined = "";
+  @Input() sidebarData: any = {};
 
   constructor(private router: Router){}
 

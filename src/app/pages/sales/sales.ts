@@ -197,19 +197,38 @@ export class Sales {
       if (!validation.isValid) return;
       const entryData = this.formData();
 
-      this.pendingSaleEntry.set(entryData);
-      console.log(entryData)
+      if (this.confirmationDetails().length === 0) {
+        notify("Please insert at least one product", "error", 3000);
+        return;
+      
+      };
+
+      // this.pendingSaleEntry.set(entryData);
+
+      // console.log(entryData)
       // console.log(this.confirmationDetails())
       // console.log(this.confirmationTotal())
-      
-      const products = this.productsObjectAvailables().filter(p => {
-        return this.confirmationDetails().find(c => c.product === p.name)
-      })
-      console.log(products)
+      // console.log(this.confirmationDetails())
+      const products = this.productsObjectAvailables()
+            .filter(p => this.confirmationDetails().some(c => c.product === p.name))
+            .map(p => {
+              const currentProduct = this.confirmationDetails().find(c => c.product === p.name)
+              return {
+                ...p,
+                quantity: currentProduct.quantity,
+              }
+            })
 
-      const customer = this.customersObjectAvailables().find(c => c.name === event.Customer);
+
+      // console.log("products", products)
+      // console.log(this.customersObjectAvailables())
+      // console.log(event.Customer)
+      const customer = this.customersObjectAvailables().find(c => c.name == entryData.Customer);
       const subTotal = this.confirmationTotal();
       const taxAmt = 123; 
+      // console.log("subTotal", subTotal, subTotal + taxAmt)
+
+      // console.log(products)
       
       const saleOrderDetails = products.map(p => ({
         salesOrderID: 75139,
@@ -217,35 +236,55 @@ export class Sales {
         OrderQty: p.quantity,
         ProductId: this.productsObjectAvailables().find(prod => prod.name === p.name).productID,
         SpecialOfferId: 1,
-        UnitPrice: p.unitPrice,
+        UnitPrice: p.standardCost,
         UnitPriceDiscount: 0.00,
-        LineTotal: p.total,
+        LineTotal: p.standardCost * p.quantity,
         ModifiedDate: new Date().toISOString(),
       }));
 
-      console.log(saleOrderDetails)
+      // console.log(saleOrderDetails)
 
-      // const productsToConfirm = this.productsArray().map((_, index) => {
-      //     const productNameFull = entryData[`Product${index}`];
-      //     const quantity = entryData[`Quantity${index}`];
-      //     if (!productNameFull || !quantity) return null;
+      const sale = {
+      SalesOrderHeader: {
+        salesOrderID: 75139,
+        RevisionNumber: 1,
+        OrderDate: new Date().toISOString(),
+        DueDate: new Date().toISOString(),
+        ShipDate: new Date().toISOString(),
+        Status: 5,
+        OnlineOrderFlag: true,
+        SalesOrderNumber: entryData.salesOrderNumber,
+        PurchaseOrderNumber: entryData.purchaseOrderNumber,
+        AccountNumber: entryData.accountNumber,
+        CustomerID: customer.customerID,
+        SalesPersonID: 279,
+        TerritoryID: 6,
+        BillToAddressID: 1074,
+        ShipToAddressID: 921,
+        ShipMethodID: 5,
+        CreditCardID: 806,
+        CreditCardApprovalCode: "1234Vi2345",
+        CurrencyRateID: 4,
+        SubTotal: subTotal,
+        TaxAmt: taxAmt,
+        Freight: 123,
+        TotalDue: subTotal + taxAmt,
+        Comment: entryData.comment,
+        ModifiedDate: new Date().toISOString(),
+      },
+      SalesOrderDetail: saleOrderDetails,
+    };
+    // console.log("sale:",sale)
+  
+    this.salesService.createSaleOrder(sale).subscribe(s => {
+      notify("Added Successfully", "success", 3000);
+      this.loadGridData();
+      // this.isFormPopupVisible.set(false);
+      this.cancelForm(); 
+    });
 
-      //     const productName = String(productNameFull).split(" - $")[0];
-      //     const product = this.productsObjectAvailables().find(p => p.name === productName);
-      //     return {
-      //         product: product.name, productId: product.productID, quantity: parseInt(quantity, 10),
-      //         unitPrice: product.standardCost, total: parseInt(quantity, 10) * product.standardCost,
-      //     };
-      // }).filter(p => p !== null);
 
-      // if (productsToConfirm.length === 0) {
-      //     notify("Please select at least one product.", "error", 3000);
-      //     return;
-      // }
 
-      // this.confirmationDetails.set(productsToConfirm as any[]);
-      // this.confirmationTotal.set(productsToConfirm.reduce((sum, p) => sum + p.total, 0));
-      // this.confirmationPopupVisible.set(true);
     }
 
 
@@ -254,25 +293,27 @@ export class Sales {
 
   onRowClick(e: any) {
     const salesOrderID = e.data.salesOrderID;
+
     // console.log(salesOrderID)
+
     if (!salesOrderID) {
         console.error('Cannot load details without Sales Order ID');
         return;
     }
 
     this.salesService.getSalesOrderDetails(salesOrderID).subscribe(details => {
-        console.log('SaleOrderID:', salesOrderID);
-        console.log('Sales Order Details:', details);
-        console.log(e)
+        // console.log('SaleOrderID:', salesOrderID);
+        // console.log('Sales Order Details:', details);
+        // console.log(e)
 
         this.getDetailGridDataSource.set(details);
     });
 }
 
   onRowRemoving(e: any) {
-    console.log('Row removing:', e.data.salesOrderID); 
+    // console.log('Row removing:', e.data.salesOrderID); 
     const idToDelete = e.data.salesOrderID; 
-    console.log(idToDelete)
+    // console.log(idToDelete)
     if (!idToDelete) {
         console.error('Cannot delete item without ID');
         e.cancel = true; 
@@ -287,7 +328,7 @@ export class Sales {
   }
 
   onRowInserting(entry: any){
-    console.log("Form submitted with entry:", entry);
+    // console.log("Form submitted with entry:", entry);
     entry.cancel = true;
     const entryData = entry.data;
 
@@ -419,12 +460,11 @@ export class Sales {
   }
 
   addProduct(){
-    const productName = this.currentSelectedProduct()//'placeholder';
+    const productName = this.currentSelectedProduct().split(" - $")[0];
     const quantity = this.currentSelectedQuantity()//1;
     
-    //obtain the rest of the product object by name and add to it the quantity
     const product = this.productsObjectAvailables().find(p => p.name === productName);
-    console.log(product)
+    // console.log(product)
 
     const productToPush = {
       product: product.name, 
@@ -434,25 +474,16 @@ export class Sales {
     }
     this.confirmationTotal.set(this.confirmationTotal() + productToPush.total)
 
-    console.log("Adding product to the form");
+    // console.log("Adding product to the form");
     this.confirmationDetails().push(productToPush)
-    console.log(this.confirmationDetails())
+    // console.log(this.confirmationDetails())
     this.cdRef.detectChanges();
   }
 
   removeProduct() {
-  if (this.productsArray().length === 1) return;
-  const productDataField = "Product" + (this.productsArray().length);
-  console.log(productDataField)
-  const grid = this.getGridInstance();
-
-
-
-
-
-
-
-  this.productsArray().pop();
+  this.confirmationDetails().length = 0;
+  this.confirmationTotal.set(0);
+  
   this.cdRef.detectChanges();
 
   }
@@ -469,7 +500,7 @@ export class Sales {
 
 
   onFormClosed = () => {
-    console.log("Form closed")
+    // console.log("Form closed")
     this.selectedProductValues().length = 0;
     this.productsArray().length = 1;
     this.currentTotal.set(0);
@@ -493,6 +524,16 @@ export class Sales {
       }
     }
   );
+
+  onRowRemovingProducts(e: any): void {
+    console.log("Removing product:", e);
+    // console.log(this.confirmationDetails());
+    this.confirmationDetails.set(this.confirmationDetails().filter(p => p.product !== e.data.product));
+    // console.log(this.confirmationDetails());
+    this.confirmationTotal.set(this.confirmationTotal() - e.data.total);
+
+    // this.confirmationDetails().length = 0;
+  }
 
   onCellPrepared(e: any) : void {
 

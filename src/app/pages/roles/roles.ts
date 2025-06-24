@@ -87,7 +87,7 @@ export class Roles {
       e.editorOptions.visible = false;
       e.editorOptions.label = { visible: false };
       e.editorOptions.label.visible = false
-      console.log(e)
+      // console.log(e)
     }
   }
   
@@ -103,7 +103,7 @@ export class Roles {
   
   onRowUpdating(e: any) {
     
-    console.log('Row updating:', e);
+    // console.log('Row updating:', e);
     
     const idToUpdate = e.key; 
      if (!idToUpdate) {
@@ -121,7 +121,7 @@ export class Roles {
       this.roleService.updateRole(updatedRole).subscribe(updatedRoleResponse => { 
           if (updatedRoleResponse) {
             notify("Updated Sucessfully", "success", 3000)
-              console.log('Role updated successfully');
+              // console.log('Role updated successfully');
               this.loadGridData();
           } else {
             notify("Error updating role", "error", 3000)
@@ -133,7 +133,7 @@ export class Roles {
   }
 
   onRowRemoving(e: any) {
-    console.log('Row removing:', e.data); 
+    // console.log('Row removing:', e.data); 
     const idToDelete = e.data.id; 
 
     if (!idToDelete) {
@@ -145,7 +145,7 @@ export class Roles {
     this.roleService.deleteRole(idToDelete).subscribe(success => { 
         if (success) {
           notify("Role deleted sucessfully", "success", 3000)
-            console.log('Role deleted successfully');
+            // console.log('Role deleted successfully');
             this.loadGridData(); 
         } else {
           notify("Error deleting role", "success", 3000)
@@ -158,7 +158,7 @@ export class Roles {
   }
 
   onRowInserting(entry: any){
-    console.log("Form submitted with entry:", entry);
+    // console.log("Form submitted with entry:", entry);
   
     const newRole: Role = {
       name: entry.data.name,
@@ -169,7 +169,7 @@ export class Roles {
       this.roleService.createRole(newRole).subscribe(createdRole => { 
         if (createdRole) {
           notify("Created Sucessfully", "success", 3000)
-          console.log('Role created successfully:', createdRole);
+          // console.log('Role created successfully:', createdRole);
           this.loadGridData();
           this.closeTheForm();
         } else {

@@ -104,7 +104,7 @@ export class Info implements OnInit {
         });
     }else if (subSection === "sales") {
     this.salesService.getSalesOrdersHeaders().subscribe(salesOrders => { 
-        console.log("Sales Orders:", salesOrders);
+        // console.log("Sales Orders:", salesOrders);
         this.dataSource.set(salesOrders);
         this.columnConfigurations.set(
           [
@@ -131,7 +131,7 @@ export class Info implements OnInit {
     }
     if (subSection === "menus"){
       this.menuService.getMenus().subscribe(menus => { 
-        console.log("Menus:", menus);
+        // console.log("Menus:", menus);
           this.dataSource.set(menus);
           this.columnConfigurations.set(
             [
@@ -146,7 +146,7 @@ export class Info implements OnInit {
     }
     if (subSection === "menu-roles"){
       this.menuService.getMenuRoles().subscribe(menuRoles => { 
-        console.log("MenuRoles:", menuRoles);
+        // console.log("MenuRoles:", menuRoles);
           this.dataSource.set(menuRoles);
           this.columnConfigurations.set(
             [
@@ -172,7 +172,7 @@ export class Info implements OnInit {
       e.editorOptions.visible = false;
       e.editorOptions.label = { visible: false };
       e.editorOptions.label.visible = false
-      console.log(e)
+      // console.log(e)
     }
   }
   
@@ -188,7 +188,7 @@ export class Info implements OnInit {
   
   onRowUpdating(e: any) {
     
-    console.log('Row updating:', e);
+    // console.log('Row updating:', e);
     
     const currentSubSection = this.subSectionSignal();
     const idToUpdate = e.key; 
@@ -223,7 +223,7 @@ export class Info implements OnInit {
 
           this.userService.updateUser(updatedUser).subscribe({ 
             next: (response) => {
-              console.log('User updated successfully');
+              // console.log('User updated successfully');
               this.loadGridData(this.subSectionSignal());
             },
             error: (error) => {
@@ -245,7 +245,7 @@ export class Info implements OnInit {
       }
         this.roleService.updateRole(updatedRole).subscribe(updatedRoleResponse => { // Use roleService
             if (updatedRoleResponse) {
-                console.log('Role updated successfully');
+                // console.log('Role updated successfully');
                 this.loadGridData(this.subSectionSignal());
             } else {
                 console.error('Failed to update role');
@@ -261,7 +261,7 @@ export class Info implements OnInit {
       }
       this.menuService.updateMenu(updatedMenu).subscribe(updatedMenuResponse => { // Use menuService
         if (updatedMenuResponse) {
-            console.log('Menu updated successfully');
+            // console.log('Menu updated successfully');
             this.loadGridData(this.subSectionSignal());
         } else {
             console.error('Failed to update menu');
@@ -272,9 +272,9 @@ export class Info implements OnInit {
     } else if (currentSubSection === "menu-roles"){
      
       this.menuService.updateMenuRoles(e.key, e.newData.roles).subscribe(menuRole =>{ // Use menuService
-        console.log(menuRole)
+        // console.log(menuRole)
         if (menuRole && menuRole.length > 0){ // Check if menuRole is not empty
-          console.log('MenuRole updated successfully')
+          // console.log('MenuRole updated successfully')
           this.loadGridData(this.subSectionSignal());
         } else {
           console.error('Failed to update MenuRole or no roles returned')
@@ -285,7 +285,7 @@ export class Info implements OnInit {
   }
 
   onRowRemoving(e: any) {
-    console.log('Row removing:', e.data); 
+    // console.log('Row removing:', e.data); 
     const currentSubSection = this.subSectionSignal();
     const idToDelete = e.data.id; 
 
@@ -298,7 +298,7 @@ export class Info implements OnInit {
     if (currentSubSection === "users"){
         this.userService.deleteUser(idToDelete).subscribe(success => { 
             if (success) {
-                console.log('User deleted successfully');
+                // console.log('User deleted successfully');
                  this.loadGridData(this.subSectionSignal()); 
             } else {
                 console.error('Failed to delete user');
@@ -307,7 +307,7 @@ export class Info implements OnInit {
     } else if (currentSubSection === "roles"){
         this.roleService.deleteRole(idToDelete).subscribe(success => { 
             if (success) {
-                console.log('Role deleted successfully');
+                // console.log('Role deleted successfully');
                 this.loadGridData(this.subSectionSignal()); 
             } else {
                 console.error('Failed to delete role');
@@ -317,7 +317,7 @@ export class Info implements OnInit {
     } else if (currentSubSection === "menus"){
       this.menuService.deleteMenu(idToDelete).subscribe(success => { 
         if (success) {
-            console.log('Menu deleted successfully');
+            // console.log('Menu deleted successfully');
             this.loadGridData(this.subSectionSignal()); 
         } else {
             console.error('Failed to delete menu');
@@ -328,7 +328,7 @@ export class Info implements OnInit {
   }
 
   onRowInserting(entry: any){
-    console.log("Form submitted with entry:", entry);
+    // console.log("Form submitted with entry:", entry);
     const currentSubSection = this.subSectionSignal();
 
   
@@ -347,10 +347,10 @@ export class Info implements OnInit {
                   updatedAt: new Date().toISOString()
               };
 
-              console.log(newUser)
+              // console.log(newUser)
               this.userService.createUser(newUser).subscribe({
                 next: (createdUser) => {
-                  console.log('User created successfully:', createdUser);
+                  // console.log('User created successfully:', createdUser);
                   this.loadGridData(currentSubSection);
                   this.closeTheForm();
                 },
@@ -369,7 +369,7 @@ export class Info implements OnInit {
           
             this.roleService.createRole(newRole).subscribe(createdRole => { 
               if (createdRole) {
-                console.log('Role created successfully:', createdRole);
+                // console.log('Role created successfully:', createdRole);
                 this.loadGridData(currentSubSection);
                 this.closeTheForm();
               } else {
@@ -386,7 +386,7 @@ export class Info implements OnInit {
           }
           this.menuService.createMenu(newMenu).subscribe(createdMenu => { 
             if (createdMenu) {
-              console.log('Menu created successfully:', createdMenu);
+              // console.log('Menu created successfully:', createdMenu);
               this.loadGridData(currentSubSection);
               this.closeTheForm();
             } else {
